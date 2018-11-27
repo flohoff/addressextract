@@ -7,4 +7,5 @@ cmake
 cmake_install.cmake
 Makefile
 CMakeFiles
+CMakeCache.txt
 addressextract

@@ -105,7 +105,7 @@ public:
 
 		if (address.count("postcode") > 0 && address.count("geompostcode") > 0) {
 			if (address["postcode"] != address["geompostcode"]) {
-				address["errors"].push_back(" Postcode mismatch");
+				address["errors"].push_back("Postcode mismatch");
 			}
 		}
 

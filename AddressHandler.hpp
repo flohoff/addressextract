@@ -23,10 +23,11 @@ class AddressHandler : public osmium::handler::Handler {
 	AreaIndex<Boundary>&		boundaryindex;
 	AreaIndex<PostCode>&		postcodeindex;
 	json				j;
+	bool				t_errors,t_missing;
 
 public:
-	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx) :
-		boundaryindex(bidx), postcodeindex(pidx) {
+	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, bool errors, bool missing) :
+		boundaryindex(bidx), postcodeindex(pidx), t_errors(errors), t_missing(missing) {
 	}
 
 	bool isaddress(const osmium::TagList& tags) {
@@ -37,8 +38,11 @@ public:
 	}
 
 
-	void extendaddrfromgeom(json& address, OGRGeometry *geom) {
+	void extend_city(json& address, OGRGeometry *geom) {
 		if (!geom)
+			return;
+
+		if (t_missing && address.count("city") > 0)
 			return;
 
 		std::vector<Boundary*> blist;
@@ -65,6 +69,18 @@ public:
 			}
 		}
 
+		if (t_missing && address.count("geomcity"))
+			address["city"]=address["geomcity"];
+	}
+
+	void extend_postcode(json& address, OGRGeometry *geom) {
+		if (!geom)
+			return;
+
+		// If we only want to add missing information
+		if (t_missing && address.count("postcode") > 0)
+			return;
+
 		std::vector<PostCode*> plist;
 		postcodeindex.findoverlapping_geom(geom, &plist);
 		for(auto i : plist) {
@@ -74,6 +90,9 @@ public:
 			address["geompostcode"]=i->postcode;
 			break;
 		}
+
+		if (t_missing && address.count("geompostcode"))
+			address["postcode"]=address["geompostcode"];
 	}
 
 	void checkerror(json& address) {
@@ -120,8 +139,11 @@ public:
 		tag2json(address, tags, "addr:postcode", "postcode");
 		tag2json(address, tags, "addr:place", "place");
 
-		extendaddrfromgeom(address, geom);
-		checkerror(address);
+		extend_city(address, geom);
+		extend_postcode(address, geom);
+
+		if (t_errors)
+			checkerror(address);
 
 		j["addresses"].push_back(address);
 

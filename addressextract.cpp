@@ -42,19 +42,26 @@ using location_handler_type = osmium::handler::NodeLocationsForWays<index_type>;
 namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
+	bool t_errors=false;
+	bool t_missing=false;
 
 	po::options_description         desc("Allowed options");
 	desc.add_options()
 		("help,h", "produce help message")
+		("errors,e", po::bool_switch(&t_errors), "Do error analysis")
+		("missing,m", po::bool_switch(&t_missing), "Only add missing postcode and city")
 		("infile,i", po::value<std::string>(), "Input file")
 	;
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	po::notify(vm);
 
+	if (vm.count("help")) {
+		std::cout << desc << "\n";
+		return 1;
+	}
+
 	osmium::io::File input_file{vm["infile"].as<std::string>()};
-
-
 
 	osmium::area::Assembler::config_type assembler_config;
 
@@ -91,7 +98,7 @@ int main(int argc, char* argv[]) {
 	reader.close();
 
 	std::cerr << "Looking for addresses" << std::endl;
-	AddressHandler	ahandler{boundaryindex, postcodeindex};
+	AddressHandler	ahandler{boundaryindex, postcodeindex, t_errors, t_missing};
 
 	osmium::io::Reader readerpass3{input_file};
 	osmium::apply(readerpass3,

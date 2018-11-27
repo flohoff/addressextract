@@ -116,11 +116,15 @@ public:
 		}
 
 		if (address.count("housenumber") > 0) {
-			std::regex	hnregex("^ |,| $");
+			// leading spaces
+			// trailing spaces
+			// 20,22
+			// 100 a
+			std::regex	hnregex("^ |,| $|[0-9] [a-z]|[0-9][A-Z]");
 			std::smatch	hnsmatch;
 			std::string	hn=address["housenumber"].get<std::string>();
 			if (std::regex_search(hn, hnsmatch, hnregex)) {
-				address["errors"].push_back("Housenumber contains comma or spaces");
+				address["errors"].push_back("Housenumber format issues");
 			}
 		}
 	}

@@ -119,8 +119,9 @@ public:
 			// leading spaces
 			// trailing spaces
 			// 20,22
+			// 20;22
 			// 100 a
-			std::regex	hnregex("^ |,| $|[0-9] [a-z]|[0-9][A-Z]");
+			std::regex	hnregex("^ |,|;| $|[0-9] [a-zA-Z]|[0-9][A-Z]");
 			std::smatch	hnsmatch;
 			std::string	hn=address["housenumber"].get<std::string>();
 			if (std::regex_search(hn, hnsmatch, hnregex)) {

@@ -5,9 +5,9 @@
 #include "AbstractArea.hpp"
 
 enum {
-	DE_PLACE_UNKNOWN,
-	DE_PLACE_CITY,
-	DE_PLACE_COUNTY
+	BTYPE_UNKNOWN,
+	BTYPE_CITY,
+	BTYPE_COUNTY
 };
 
 class Boundary : public AbstractArea {
@@ -15,7 +15,8 @@ public:
 	int		admin_level=99;
 	std::string	admin_level_string;
 	std::string	name;
-	int		deplace=DE_PLACE_UNKNOWN;
+	std::string	deplace_string;
+	int		boundarytype=BTYPE_UNKNOWN;
 
 	Boundary(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
 		: AbstractArea(std::move(geom), area) {
@@ -30,19 +31,23 @@ public:
 
 		// Kreisfreie Städte
 		if (admin_level == 6) {
-			const char *s=taglist.get_value_by_key("de:place", "");
-			if (!s || s == "county")
-				deplace=DE_PLACE_COUNTY;
+			deplace_string=taglist.get_value_by_key("de:place", "");
+			if (deplace_string == "county" || deplace_string == "")
+				boundarytype=BTYPE_COUNTY;
 			else
-				deplace=DE_PLACE_CITY;
+				boundarytype=BTYPE_CITY;
 		}
 
 
-		std::cerr << "Boundary constructor called for " << name << " admin_level " << admin_level << " de:place " << deplace << std::endl;
+		std::cerr << "Boundary constructor called for " << name
+			<< " admin_level " << admin_level
+			<< " de:place " << deplace_string
+			<< " boundarytype " << boundarytype
+			<< std::endl;
 	}
 
 	bool is_county(void ) {
-		return (deplace == DE_PLACE_COUNTY);
+		return (boundarytype == BTYPE_COUNTY);
 	}
 };
 

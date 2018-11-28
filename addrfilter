@@ -1,0 +1,53 @@
+#!/usr/bin/perl -w
+
+use strict;
+use Modern::Perl '2014';
+use experimental 'smartmatch';
+use Getopt::Long::Descriptive;
+use open IO => ":encoding(utf-8)";
+use open ':std';
+
+use File::Slurp qw/read_file/;
+use JSON qw/from_json to_json/;
+use Data::Dumper;
+use Array::Utils qw(:all);
+
+my ($opt, $usage) = describe_options(
+	'addrfilter %o <some-arg>',
+	[ 'input|i=s',		"Input file", { required => 1  } ],
+	[ 'errors|e',		"Only extract addresses with errors" ],
+	[ 'postcode|p=s@',	"Extract only postcode" ],
+	[ 'csv|c',		"Output as csv" ],
+	[],
+	[ 'help',		"print usage message and exit", { shortcircuit => 1 } ],
+);
+
+print($usage->text), exit if $opt->help;
+
+my $addresses = from_json(read_file($opt->input), { utf8 => 1 });
+
+if (defined($opt->errors)) {
+	my @errors=grep { defined($_->{errors}); } @{$addresses->{addresses}};
+	$addresses->{addresses}=\@errors;
+}
+
+if (defined($opt->postcode)) {
+	my @filtered=grep { 
+		my @a=( $_->{postcode} // "", $_->{geompostcode} // "");
+		scalar intersect(@a, @{$opt->postcode});
+	} @{$addresses->{addresses}};
+	$addresses->{addresses}=\@filtered;
+}
+
+if ($opt->csv) {
+	my @head=qw/postcode city suburb street housenumber lat lon id source geompostcode geomcity geomsuburb geomcounty errors/;
+	my @a=map { $_->{errors} = join(";", @{$_->{errors}}); $_; } @{$addresses->{addresses}};
+
+	print(join(",", map { "\"$_\"" } @head) . "\n");
+	foreach my $line ( @a ) {
+		my @l=map { $line->{$_} // "" } @head;
+		print(join(",", map { "\"$_\"" } @l) . "\n");
+	}
+} else {
+	print JSON->new->encode($addresses)
+}

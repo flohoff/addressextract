@@ -12,10 +12,17 @@ enum {
 
 class Boundary : public AbstractArea {
 public:
+	osmium::unsigned_object_id_type	id;
 	int		admin_level=99;
 	std::string	admin_level_string;
+
 	std::string	name;
-	std::string	deplace_string;
+	std::string	deplace;
+	std::string	nameprefix;
+	std::string	namesuffix;
+
+	std::string	nameofficial;
+
 	int		boundarytype=BTYPE_UNKNOWN;
 
 	Boundary(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
@@ -23,7 +30,29 @@ public:
 
 		const osmium::TagList& taglist=area.tags();
 
+		id=area.id();
+
 		name=taglist.get_value_by_key("name", "");
+		nameprefix=taglist.get_value_by_key("name:prefix", "");
+		namesuffix=taglist.get_value_by_key("name:suffix", "");
+
+		//
+		// Build official name - No documentation on the osm wiki for this
+		//
+		// Examples show:
+		//
+		//   name:prefix=Stadt
+		//   name=Werther
+		//   name:suffix=(Westf.)
+		//
+		// Or
+		//
+		//   name:prefix=Stadt
+		//   name=Halle (Westf.)
+		//
+		nameofficial=name;
+		if (namesuffix != "")
+			nameofficial.append(" ").append(namesuffix);
 
 		admin_level_string=taglist.get_value_by_key("admin_level", "");
 		if (admin_level_string != "")
@@ -31,17 +60,25 @@ public:
 
 		// Kreisfreie Städte
 		if (admin_level == 6) {
-			deplace_string=taglist.get_value_by_key("de:place", "");
-			if (deplace_string == "county" || deplace_string == "")
+			deplace=taglist.get_value_by_key("de:place", "");
+			if (deplace == "county" || deplace == "")
 				boundarytype=BTYPE_COUNTY;
 			else
 				boundarytype=BTYPE_CITY;
 		}
 
 
-		std::cerr << "Boundary constructor called for " << name
+		std::cerr << "Boundary constructor called for "
+			<< nameofficial
+			<< std::endl << "\t"
+			<< " id " << id
+			<< std::endl << "\t"
+			<< " name " << name
+			<< " name:prefix " << nameprefix
+			<< " name:suffix " << namesuffix
+			<< std::endl << "\t"
 			<< " admin_level " << admin_level
-			<< " de:place " << deplace_string
+			<< " de:place " << deplace
 			<< " boundarytype " << boundarytype
 			<< std::endl;
 	}

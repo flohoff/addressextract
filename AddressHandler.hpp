@@ -24,10 +24,16 @@ class AddressHandler : public osmium::handler::Handler {
 	AreaIndex<PostCode>&		postcodeindex;
 	json				j;
 	bool				t_errors,t_missing;
-
+	std::regex			housenumber_regex;
+	std::regex			street_regex;
+	std::regex			postcode_regex;
 public:
 	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, bool errors, bool missing) :
 		boundaryindex(bidx), postcodeindex(pidx), t_errors(errors), t_missing(missing) {
+
+		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]|[0-9][A-Z]";
+		street_regex="^ | $|Str\\.$|str\\.$|\\t";
+		postcode_regex="^[0-9]{5}$";
 	}
 
 	bool isaddress(const osmium::TagList& tags) {
@@ -55,16 +61,17 @@ public:
 
 			switch(i->admin_level) {
 				case(8):
-					address["geomcity"]=i->name;
+					address["geomcity"]=i->nameofficial;
 					break;
 				case(6):
 					if (i->is_county())
-						address["geomcounty"]=i->name;
+						address["geomcounty"]=i->nameofficial;
 					else
-						address["geomcity"]=i->name;
+						address["geomcity"]=i->nameofficial;
 					break;
+				case(9):
 				case(10):
-					address["geomsuburb"]=i->name;
+					address["geomsuburb"]=i->nameofficial;
 					break;
 			}
 		}
@@ -84,11 +91,11 @@ public:
 		std::vector<PostCode*> plist;
 		postcodeindex.findoverlapping_geom(geom, &plist);
 		for(auto i : plist) {
-			if (!geom->Intersects(i->geometry))
-				continue;
-
-			address["geompostcode"]=i->postcode;
-			break;
+			if (geom->Within(i->geometry)
+				|| geom->Overlaps(i->geometry)) {
+				address["geompostcode"]=i->postcode;
+				break;
+			}
 		}
 
 		if (t_missing && address.count("geompostcode"))
@@ -102,6 +109,20 @@ public:
 			address["errors"].push_back("No postcode");
 		if (address.count("street") == 0 && address.count("place") == 0)
 			address["errors"].push_back("No addr:street or addr:place");
+
+		if (address.count("street") > 0) {
+			std::string	street=address["street"].get<std::string>();
+			if (std::regex_search(street, street_regex)) {
+				address["errors"].push_back("Street format issues");
+			}
+		}
+
+		if (address.count("postcode") > 0) {
+			std::string	postcode=address["postcode"].get<std::string>();
+			if (!std::regex_search(postcode, postcode_regex)) {
+				address["errors"].push_back("Postcode format issues");
+			}
+		}
 
 		if (address.count("postcode") > 0 && address.count("geompostcode") > 0) {
 			if (address["postcode"] != address["geompostcode"]) {
@@ -121,10 +142,8 @@ public:
 			// 20,22
 			// 20;22
 			// 100 a
-			std::regex	hnregex("^ |,|;| $|[0-9] [a-zA-Z]|[0-9][A-Z]");
-			std::smatch	hnsmatch;
 			std::string	hn=address["housenumber"].get<std::string>();
-			if (std::regex_search(hn, hnsmatch, hnregex)) {
+			if (std::regex_search(hn, housenumber_regex)) {
 				address["errors"].push_back("Housenumber format issues");
 			}
 		}

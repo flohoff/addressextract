@@ -41,7 +41,7 @@ if (defined($opt->postcode)) {
 
 if ($opt->csv) {
 	my @head=qw/postcode city suburb street housenumber lat lon id source geompostcode geomcity geomsuburb geomcounty errors/;
-	my @a=map { $_->{errors} = join(";", @{$_->{errors}}); $_; } @{$addresses->{addresses}};
+	my @a=map { if (defined($_->{errors})) { $_->{errors} = join(";", @{$_->{errors}}); } $_; } @{$addresses->{addresses}};
 
 	print(join(",", map { "\"$_\"" } @head) . "\n");
 	foreach my $line ( @a ) {

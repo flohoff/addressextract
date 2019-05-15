@@ -50,11 +50,17 @@ int main(int argc, char* argv[]) {
 		("help,h", "produce help message")
 		("errors,e", po::bool_switch(&t_errors), "Do error analysis")
 		("missing,m", po::bool_switch(&t_missing), "Only add missing postcode and city")
-		("infile,i", po::value<std::string>(), "Input file")
+		("infile,i", po::value<std::string>()->required(), "Input file")
 	;
 	po::variables_map vm;
-	po::store(po::parse_command_line(argc, argv, desc), vm);
-	po::notify(vm);
+	try {
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		po::notify(vm);
+	} catch(const boost::program_options::error& e) {
+		std::cerr << "Error: " << e.what() << "\n";
+		std::cout << desc << std::endl;
+		exit(-1);
+	}
 
 	if (vm.count("help")) {
 		std::cout << desc << "\n";

@@ -37,9 +37,12 @@ public:
 	}
 
 	bool isaddress(const osmium::TagList& tags) {
-		if (tags.has_key("addr:housenumber")) {
+		if (tags.has_key("addr:housenumber"))
 			return true;
-		}
+		if (tags.has_key("addr:street"))
+			return true;
+		if (tags.has_key("addr:city"))
+			return true;
 		return false;
 	}
 
@@ -103,6 +106,8 @@ public:
 	}
 
 	void checkerror(json& address) {
+		if (address.count("housenumber") == 0)
+			address["errors"].push_back("No housenumber");
 		if (address.count("city") == 0)
 			address["errors"].push_back("No city");
 		if (address.count("postcode") == 0)

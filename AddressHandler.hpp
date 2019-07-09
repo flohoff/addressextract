@@ -27,13 +27,17 @@ class AddressHandler : public osmium::handler::Handler {
 	std::regex			housenumber_regex;
 	std::regex			street_regex;
 	std::regex			postcode_regex;
+	std::string			timestamp;
 public:
-	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, bool errors, bool missing) :
-		boundaryindex(bidx), postcodeindex(pidx), t_errors(errors), t_missing(missing) {
+	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, bool errors, bool missing, std::string timestamp) :
+		boundaryindex(bidx), postcodeindex(pidx), t_errors(errors), t_missing(missing), timestamp(timestamp) {
 
 		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]|[0-9][A-Z]";
 		street_regex="^ | $|Str\\.$|str\\.$|\\t";
 		postcode_regex="^[0-9]{5}$";
+
+		if (!timestamp.empty())
+			j["timestamp"]=timestamp;
 	}
 
 	bool isaddress(const osmium::TagList& tags) {

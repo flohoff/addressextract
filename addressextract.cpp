@@ -92,6 +92,10 @@ int main(int argc, char* argv[]) {
 
 	std::cerr << "Building geometry indexes for boundarys and postcodes" << std::endl;
 	osmium::io::Reader reader{input_file};
+	osmium::io::Header header{reader.header()};
+
+	std::cerr << "Timestamp " << header.get("timestamp") << std::endl;
+
 	osmium::apply(reader,
 		location_handler,
 		boundarymp_manager.handler([&boundaryindex](osmium::memory::Buffer&& buffer) {
@@ -104,7 +108,7 @@ int main(int argc, char* argv[]) {
 	reader.close();
 
 	std::cerr << "Looking for addresses" << std::endl;
-	AddressHandler	ahandler{boundaryindex, postcodeindex, t_errors, t_missing};
+	AddressHandler	ahandler{boundaryindex, postcodeindex, t_errors, t_missing, header.get("timestamp")};
 
 	osmium::io::Reader readerpass3{input_file};
 	osmium::apply(readerpass3,

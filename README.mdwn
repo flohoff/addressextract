@@ -1,0 +1,9 @@
+
+Todo
+====
+
+* hausnummern mit spaces oder "," 
+  z.b. "4a,b" oder "5a,5b"
+- Straßen mit spaces am anfang oder ende
+- Straßen mit "," im Namen
+  33602,Bielefeld,LOOM, Bahnhofstraße,28,52.025702,8.531427,node,5202495577,33602,Bielefeld,,

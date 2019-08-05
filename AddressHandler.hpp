@@ -29,6 +29,8 @@ class AddressHandler : public osmium::handler::Handler {
 	std::regex			postcode_regex;
 	std::string			timestamp;
 	OGRPoint			point;
+	std::vector<PostCode*>		postcodelist;
+	std::vector<Boundary*>		boundarylist;
 public:
 	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, bool errors, bool missing, std::string timestamp) :
 		boundaryindex(bidx), postcodeindex(pidx), t_errors(errors), t_missing(missing), timestamp(timestamp) {
@@ -56,11 +58,10 @@ public:
 		if (t_missing && address.count("city") > 0)
 			return;
 
-		std::vector<Boundary*> blist;
-		boundaryindex.findoverlapping_geom(geom, &blist);
-		std::sort(blist.begin(), blist.end(), compare_admin_level);
-		for(auto i : blist) {
-
+		boundarylist.clear();
+		boundaryindex.findoverlapping_geom(geom, &boundarylist);
+		std::sort(boundarylist.begin(), boundarylist.end(), compare_admin_level);
+		for(auto i : boundarylist) {
 			if (!geom->Intersects(i->geometry))
 				continue;
 
@@ -90,9 +91,9 @@ public:
 		if (t_missing && address.count("postcode") > 0)
 			return;
 
-		std::vector<PostCode*> plist;
-		postcodeindex.findoverlapping_geom(geom, &plist);
-		for(auto i : plist) {
+		postcodelist.clear();
+		postcodeindex.findoverlapping_geom(geom, &postcodelist);
+		for(auto i : postcodelist) {
 			if (geom->Within(i->geometry)
 				|| geom->Overlaps(i->geometry)) {
 				address["geompostcode"]=i->postcode;

@@ -217,7 +217,7 @@ public:
 		if (!isaddress(node.tags()))
 			return;
 
-		json				address;
+		json			address;
 
 		address["source"]="node";
 		address["id"]=std::to_string(node.id());
@@ -232,11 +232,14 @@ public:
 	}
 
 	void area(const osmium::Area& area) {
-		json		address;
-		address["source"]="relation";
-		address["id"]=std::to_string(area.id());
 		if (!isaddress(area.tags()))
 			return;
+
+		json		address;
+
+		address["source"]="relation";
+		address["id"]=std::to_string(area.id());
+
 		parseaddr(address, nullptr, area.tags());
 	}
 

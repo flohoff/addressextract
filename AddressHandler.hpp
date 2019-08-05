@@ -53,9 +53,6 @@ public:
 
 
 	void extend_city(json& address, OGRGeometry *geom) {
-		if (!geom)
-			return;
-
 		if (t_missing && address.count("city") > 0)
 			return;
 
@@ -89,9 +86,6 @@ public:
 	}
 
 	void extend_postcode(json& address, OGRGeometry *geom) {
-		if (!geom)
-			return;
-
 		// If we only want to add missing information
 		if (t_missing && address.count("postcode") > 0)
 			return;
@@ -173,8 +167,10 @@ public:
 		tag2json(address, tags, "addr:postcode", "postcode");
 		tag2json(address, tags, "addr:place", "place");
 
-		extend_city(address, geom);
-		extend_postcode(address, geom);
+		if (geom) {
+			extend_city(address, geom);
+			extend_postcode(address, geom);
+		}
 
 		if (t_errors)
 			checkerror(address);

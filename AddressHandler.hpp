@@ -28,6 +28,7 @@ class AddressHandler : public osmium::handler::Handler {
 	std::regex			street_regex;
 	std::regex			postcode_regex;
 	std::string			timestamp;
+	OGRPoint			point;
 public:
 	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, bool errors, bool missing, std::string timestamp) :
 		boundaryindex(bidx), postcodeindex(pidx), t_errors(errors), t_missing(missing), timestamp(timestamp) {
@@ -179,9 +180,6 @@ public:
 			checkerror(address);
 
 		j["addresses"].push_back(address);
-
-		if (geom)
-			free(geom);
 	}
 
 	void way(osmium::Way& way) {
@@ -189,18 +187,18 @@ public:
 		if (!isaddress(way.tags()))
 			return;
 
-		std::unique_ptr<OGRGeometry>  geom;
+		OGRGeometry	*geom=nullptr;
 
 		json		address;
 		address["source"]="way";
 		address["id"]=std::to_string(way.id());
 
 		try {
-			OGRPoint Point;
-			geom = m_factory.create_linestring(way);
-			geom->Centroid(&Point);
-			address["lat"]=std::to_string(Point.getY());
-			address["lon"]=std::to_string(Point.getX());
+			geom=m_factory.create_linestring(way).release();
+
+			geom->Centroid(&point);
+			address["lat"]=std::to_string(point.getY());
+			address["lon"]=std::to_string(point.getX());
                 } catch (gdalcpp::gdal_error) {
                         std::cerr << "gdal_error while creating feature wayid " << way.id()<< std::endl;
                 } catch (osmium::invalid_location) {
@@ -209,8 +207,10 @@ public:
                         std::cerr << "geometry error wayid " << way.id() << std::endl;
                 }
 
+		parseaddr(address, geom, way.tags());
 
-		parseaddr(address, geom.release(), way.tags());
+		if (geom)
+			free(geom);
 	}
 
 	void node(const osmium::Node& node) {
@@ -223,12 +223,13 @@ public:
 		address["id"]=std::to_string(node.id());
 
 		osmium::Location location=node.location();
-		OGRPoint	*point=new OGRPoint(location.lon(), location.lat());
+		point.setX(location.lon());
+		point.setY(location.lat());
 
 		address["lat"]=std::to_string(location.lat());
 		address["lon"]=std::to_string(location.lon());
 
-		parseaddr(address, point, node.tags());
+		parseaddr(address, &point, node.tags());
 	}
 
 	void area(const osmium::Area& area) {

@@ -25,6 +25,8 @@ public:
 
 	int		boundarytype=BTYPE_UNKNOWN;
 
+	Boundary*	up=nullptr;
+
 	Boundary(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
 		: AbstractArea(std::move(geom), area) {
 

@@ -44,6 +44,8 @@ public:
 	}
 
 	bool isaddress(const osmium::TagList& tags) {
+		if (tags.empty())
+			return false;
 		if (tags.has_key("addr:housenumber"))
 			return true;
 		if (tags.has_key("addr:street"))
@@ -53,6 +55,23 @@ public:
 		return false;
 	}
 
+	void extend_city_boundary(json& address, Boundary *b) {
+		switch(b->admin_level) {
+			case(8):
+				address["geomcity"]=b->nameofficial;
+				break;
+			case(6):
+				if (b->is_county())
+					address["geomcounty"]=b->nameofficial;
+				else
+					address["geomcity"]=b->nameofficial;
+				break;
+			case(9):
+			case(10):
+				address["geomsuburb"]=b->nameofficial;
+				break;
+		}
+	}
 
 	void extend_city(json& address, OGRGeometry *geom) {
 		if (t_missing && address.count("city") > 0)
@@ -61,25 +80,43 @@ public:
 		boundarylist.clear();
 		boundaryindex.findoverlapping_geom(geom, &boundarylist);
 		std::sort(boundarylist.begin(), boundarylist.end(), compare_admin_level);
-		for(auto i : boundarylist) {
-			if (!geom->Intersects(i->geometry))
+
+		int		lastadminlevel=0;
+		Boundary	*lastboundary=nullptr;
+
+		for(auto b : boundarylist) {
+			if (!geom->Intersects(b->geometry))
 				continue;
 
-			switch(i->admin_level) {
-				case(8):
-					address["geomcity"]=i->nameofficial;
-					break;
-				case(6):
-					if (i->is_county())
-						address["geomcounty"]=i->nameofficial;
-					else
-						address["geomcity"]=i->nameofficial;
-					break;
-				case(9):
-				case(10):
-					address["geomsuburb"]=i->nameofficial;
-					break;
+			extend_city_boundary(address, b);
+
+			if (b->up) {
+				while(b->up) {
+					b=b->up;
+					extend_city_boundary(address, b);
+				}
+				break;
 			}
+
+			// Insert us into last admin level if its
+			// bigger - read - a smaller level.
+			if (lastboundary
+				&& b->admin_level < lastadminlevel
+				&& lastboundary->up == nullptr) {
+
+				std::cerr
+					<< "Set cache parent "
+					<< " to " << lastboundary->nameofficial
+					<< " (" << lastadminlevel << ") "
+					<< b->nameofficial
+					<< " (" << b->admin_level << ") "
+					<< std::endl;
+
+				lastboundary->up=b;
+			}
+
+			lastadminlevel=b->admin_level;
+			lastboundary=b;
 		}
 
 		if (t_missing && address.count("geomcity"))
@@ -196,6 +233,9 @@ public:
 			geom->Centroid(&point);
 			address["lat"]=std::to_string(point.getY());
 			address["lon"]=std::to_string(point.getX());
+
+			parseaddr(address, &point, way.tags());
+
                 } catch (gdalcpp::gdal_error) {
                         std::cerr << "gdal_error while creating feature wayid " << way.id()<< std::endl;
                 } catch (osmium::invalid_location) {
@@ -203,8 +243,6 @@ public:
                 } catch (osmium::geometry_error) {
                         std::cerr << "geometry error wayid " << way.id() << std::endl;
                 }
-
-		parseaddr(address, geom, way.tags());
 
 		if (geom)
 			free(geom);

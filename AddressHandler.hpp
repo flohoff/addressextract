@@ -86,6 +86,8 @@ public:
 		Boundary	*lastboundary=nullptr;
 
 		for(auto b : boundarylist) {
+			if (b->admin_level > 10)
+				continue;
 			if (!geom->Intersects(b->geometry))
 				continue;
 

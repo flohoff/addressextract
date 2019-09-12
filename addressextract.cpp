@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
 	AreaIndex<Boundary>	boundaryindex;
 	osmium::TagsFilter	boundaryfilter{false};
 	boundaryfilter.add_rule(true, osmium::TagMatcher{"boundary", "administrative"});
+	boundaryfilter.add_rule(true, osmium::TagMatcher{"admin_level"});
 	osmium::area::MultipolygonManager<osmium::area::Assembler> boundarymp_manager{assembler_config, boundaryfilter};
 
 	AreaIndex<PostCode>	postcodeindex;

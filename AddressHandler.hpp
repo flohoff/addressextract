@@ -23,7 +23,7 @@ class AddressHandler : public osmium::handler::Handler {
 	AreaIndex<Boundary>&		boundaryindex;
 	AreaIndex<PostCode>&		postcodeindex;
 	json				j;
-	bool				t_errors,t_missing;
+	bool				t_errors,t_missing,t_nocache;
 	std::regex			housenumber_regex;
 	std::regex			street_regex;
 	std::regex			postcode_regex;
@@ -32,8 +32,10 @@ class AddressHandler : public osmium::handler::Handler {
 	std::vector<PostCode*>		postcodelist;
 	std::vector<Boundary*>		boundarylist;
 public:
-	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, bool errors, bool missing, std::string timestamp) :
-		boundaryindex(bidx), postcodeindex(pidx), t_errors(errors), t_missing(missing), timestamp(timestamp) {
+	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx,
+			bool errors, bool missing, bool nocache, std::string timestamp) :
+		boundaryindex(bidx), postcodeindex(pidx),
+			t_errors(errors), t_missing(missing), t_nocache(nocache), timestamp(timestamp) {
 
 		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]|[0-9][A-Z]";
 		street_regex="^ | $|Str\\.$|str\\.$|\\t";
@@ -81,7 +83,6 @@ public:
 		boundaryindex.findoverlapping_geom(geom, &boundarylist);
 		std::sort(boundarylist.begin(), boundarylist.end(), compare_admin_level);
 
-		int		lastadminlevel=0;
 		Boundary	*lastboundary=nullptr;
 
 		for(auto b : boundarylist) {
@@ -90,7 +91,7 @@ public:
 
 			extend_city_boundary(address, b);
 
-			if (b->up) {
+			if (!t_nocache && b->up) {
 				while(b->up) {
 					b=b->up;
 					extend_city_boundary(address, b);
@@ -100,22 +101,22 @@ public:
 
 			// Insert us into last admin level if its
 			// bigger - read - a smaller level.
-			if (lastboundary
-				&& b->admin_level < lastadminlevel
+			if (!t_nocache
+				&& lastboundary
+				&& b->admin_level < lastboundary->admin_level
 				&& lastboundary->up == nullptr) {
 
 				std::cerr
-					<< "Set cache parent "
-					<< " to " << lastboundary->nameofficial
-					<< " (" << lastadminlevel << ") "
+					<< "Set cache parent of "
+					<< lastboundary->nameofficial
+					<< " (" << lastboundary->admin_level << ") id (" << lastboundary->id << ")"
+					<< " to "
 					<< b->nameofficial
-					<< " (" << b->admin_level << ") "
+					<< " (" << b->admin_level << ") id (" << b->id << ") "
 					<< std::endl;
 
 				lastboundary->up=b;
 			}
-
-			lastadminlevel=b->admin_level;
 			lastboundary=b;
 		}
 

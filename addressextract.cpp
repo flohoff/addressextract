@@ -44,12 +44,14 @@ namespace po = boost::program_options;
 int main(int argc, char* argv[]) {
 	bool t_errors=false;
 	bool t_missing=false;
+	bool t_nocache=false;
 
 	po::options_description         desc("Allowed options");
 	desc.add_options()
 		("help,h", "produce help message")
 		("errors,e", po::bool_switch(&t_errors), "Do error analysis")
 		("missing,m", po::bool_switch(&t_missing), "Only add missing postcode and city")
+		("nocache", po::bool_switch(&t_nocache), "Do not use boundary caching")
 		("infile,i", po::value<std::string>()->required(), "Input file")
 	;
 	po::variables_map vm;
@@ -108,7 +110,8 @@ int main(int argc, char* argv[]) {
 	reader.close();
 
 	std::cerr << "Looking for addresses" << std::endl;
-	AddressHandler	ahandler{boundaryindex, postcodeindex, t_errors, t_missing, header.get("timestamp")};
+	AddressHandler	ahandler{boundaryindex, postcodeindex,
+		t_errors, t_missing, t_nocache, header.get("timestamp")};
 
 	osmium::io::Reader readerpass3{input_file};
 	osmium::apply(readerpass3,

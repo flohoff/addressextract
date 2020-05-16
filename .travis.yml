@@ -17,6 +17,7 @@ matrix:
             - libgdal-dev
             - libbz2-dev
             - libexpat1-dev
+            - nlohmann-json-dev
 
 before_script:
     - git submodule update --init

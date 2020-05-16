@@ -1,0 +1,28 @@
+language: cpp
+compiler: gcc
+sudo: false
+dist: bionic
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - build-essential
+            - cmake-data
+            - cmake
+            - libboost-all-dev
+            - libspatialindex-dev
+            - libgdal-dev
+            - libbz2-dev
+            - libexpat1-dev
+
+before_script:
+    - git submodule update --init
+    - gcc -v && g++ -v && cmake --version
+    - cmake -LA .
+
+script:
+    - make VERBOSE=1
+

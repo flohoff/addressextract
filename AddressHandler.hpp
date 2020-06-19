@@ -37,8 +37,8 @@ public:
 		boundaryindex(bidx), postcodeindex(pidx),
 			t_errors(errors), t_missing(missing), t_nocache(nocache), timestamp(timestamp) {
 
-		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]|[0-9][A-Z]";
-		street_regex="^ | $|Str\\.$|str\\.$|\\t";
+		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]";
+		street_regex="^ | $|Str\\.$|str\\.$|\\t|\\.$";
 		postcode_regex="^[0-9]{5}$";
 
 		if (!timestamp.empty())

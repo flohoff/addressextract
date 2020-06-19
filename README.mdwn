@@ -1,5 +1,56 @@
 
-Todo
+`addressextract` parses an OpenStreetmap PBF file and exports all addresses e.g. objects with `addr:*`
+tags on them. It also reassembles admin and postcode boundarys and extends the addressinformation
+with those.
+
+A typical address looks like this:
+
+    {
+      "city": "Paderborn",
+      "geomcity": "Paderborn",
+      "geomcounty": "Kreis Paderborn",
+      "geompostcode": "33098",
+      "geomsuburb": "Paderborn",
+      "housenumber": "2a",
+      "id": "25906061",
+      "lat": "51.717383",
+      "lon": "8.752651",
+      "postcode": "33098",
+      "source": "node",
+      "street": "Marienplatz"
+    }
+
+All the `geom*` tags originate from the boundaries, be it postcode or admin boundary.
+`id` and `source` tell the origin osm object be it node or way and its id.
+
+Additionally you could run the extractor with "-e" so it will add an error field
+describing problems with this address - It could look like this:
+
+      "errors": [
+        "No housenumber",
+        "No postcode",
+        "No addr:street or addr:place"
+      ]
+
+Usage
+=====
+
+	addressextract -i mylocal.pbf >addresses.json
+
+Build
+=====
+
+	apt-get install build-essential cmake-data cmake libboost-all-dev \
+	    libspatialindex-dev libgdal-dev libbz2-dev libexpat1-dev nlohmann-json-dev
+	
+	git clone https://github.com/flohoff/addressextract.git
+
+	cd addressextract
+	git submodule update --init
+	cmake .
+	make
+
+Todo 
 ====
 
 * hausnummern mit spaces oder "," 

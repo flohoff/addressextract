@@ -24,9 +24,10 @@ class AddressHandler : public osmium::handler::Handler {
 	AreaIndex<PostCode>&		postcodeindex;
 	json				j;
 	bool				t_errors,t_missing,t_nocache;
-	std::regex			housenumber_regex;
-	std::regex			street_regex;
-	std::regex			postcode_regex;
+	std::regex			housenumber_regex,
+					street_regex,
+					postcode_regex,
+					housename_regex;
 	std::string			timestamp;
 	OGRPoint			point;
 	std::vector<PostCode*>		postcodelist;
@@ -38,6 +39,7 @@ public:
 			t_errors(errors), t_missing(missing), t_nocache(nocache), timestamp(timestamp) {
 
 		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]";
+		housename_regex="^ *[0-9]* *$|GmbH|e\\. *V\\.|Sparkasse|[sS]tr\\.|[Ss]traße|http[s]*://";
 		street_regex="^ | $|Str\\.$|str\\.$|\\t|\\.$";
 		postcode_regex="^[0-9]{5}$";
 
@@ -181,6 +183,14 @@ public:
 			}
 		}
 
+		if (address.count("housename") > 0) {
+			std::string	hn=address["housename"].get<std::string>();
+
+			if (std::regex_search(hn, housename_regex)) {
+				address["errors"].push_back("Housename suspicious");
+			}
+		}
+
 		if (address.count("housenumber") > 0) {
 			// leading spaces
 			// trailing spaces
@@ -207,6 +217,7 @@ public:
 		tag2json(address, tags, "addr:suburb", "suburb");
 		tag2json(address, tags, "addr:postcode", "postcode");
 		tag2json(address, tags, "addr:place", "place");
+		tag2json(address, tags, "addr:housename", "housename");
 
 		if (geom) {
 			extend_city(address, geom);

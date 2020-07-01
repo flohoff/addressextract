@@ -9,10 +9,12 @@
 #include <regex>
 #include <string>
 #include <iostream>
+#include <boost/format.hpp>
 
 #include "AreaIndex.hpp"
 #include "Boundary.hpp"
 #include "PostCode.hpp"
+#include "Building.hpp"
 
 using json = nlohmann::json;
 
@@ -22,6 +24,7 @@ class AddressHandler : public osmium::handler::Handler {
 	osmium::geom::OGRFactory<>      m_factory{};
 	AreaIndex<Boundary>&		boundaryindex;
 	AreaIndex<PostCode>&		postcodeindex;
+	AreaIndex<Building>&		buildingindex;
 	json				j;
 	bool				t_errors,t_missing,t_nocache;
 	std::regex			housenumber_regex,
@@ -30,12 +33,12 @@ class AddressHandler : public osmium::handler::Handler {
 					housename_regex;
 	std::string			timestamp;
 	OGRPoint			point;
-	std::vector<PostCode*>		postcodelist;
 	std::vector<Boundary*>		boundarylist;
+	std::vector<PostCode*>		postcodelist;
 public:
-	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx,
+	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, AreaIndex<Building>& buidx,
 			bool errors, bool missing, bool nocache, std::string timestamp) :
-		boundaryindex(bidx), postcodeindex(pidx),
+		boundaryindex(bidx), postcodeindex(pidx), buildingindex(buidx),
 			t_errors(errors), t_missing(missing), t_nocache(nocache), timestamp(timestamp) {
 
 		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]";
@@ -147,7 +150,7 @@ public:
 			address["postcode"]=address["geompostcode"];
 	}
 
-	void checkerror(json& address) {
+	void checkerror(json& address, OGRGeometry *geom) {
 		if (address.count("housenumber") == 0)
 			address["errors"].push_back("No housenumber");
 		if (address.count("city") == 0)
@@ -202,6 +205,32 @@ public:
 				address["errors"].push_back("Housenumber format issues");
 			}
 		}
+
+		if (address["source"] == "node") {
+			static std::vector<Building*>	list;
+
+			list.clear();
+
+			buildingindex.findoverlapping_geom(geom, &list);
+
+			for(auto i : list) {
+				if (!geom->Within(i->geometry))
+					continue;
+
+				std::vector<std::string> comparekeys={ "city", "street", "postcode", "housenumber" };
+
+				for(auto key : comparekeys) {
+					if (i->j[key].is_string()
+						&& address[key].is_string()
+						&& i->j[key] != address[key]) {
+
+						address["errors"].push_back(str(boost::format("addr:%1% mismatch to enclosing building outline") % key));
+					}
+				}
+
+				break;
+			}
+		}
 	}
 
 	void tag2json(json& address, const osmium::TagList& tags, const char *tagname, const char *jsonkey) {
@@ -225,7 +254,7 @@ public:
 		}
 
 		if (t_errors)
-			checkerror(address);
+			checkerror(address, geom);
 
 		j["addresses"].push_back(address);
 	}

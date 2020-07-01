@@ -26,6 +26,7 @@
 #include <boost/program_options.hpp>
 #include <boost/format.hpp>
 
+#include "Building.hpp"
 #include "Boundary.hpp"
 #include "PostCode.hpp"
 #include "AreaIndex.hpp"
@@ -73,6 +74,12 @@ int main(int argc, char* argv[]) {
 
 	osmium::area::Assembler::config_type assembler_config;
 
+
+	AreaIndex<Building>	buildingindex;
+	osmium::TagsFilter	buildingfilter{false};
+	buildingfilter.add_rule(true, osmium::TagMatcher{"building"});
+	osmium::area::MultipolygonManager<osmium::area::Assembler> buildingmp_manager{assembler_config, buildingfilter};
+
 	AreaIndex<Boundary>	boundaryindex;
 	osmium::TagsFilter	boundaryfilter{false};
 	boundaryfilter.add_rule(true, osmium::TagMatcher{"boundary", "administrative"});
@@ -87,7 +94,7 @@ int main(int argc, char* argv[]) {
 	// We read the input file twice. In the first pass, only relations are
 	// read and fed into the multipolygon manager.
 	std::cerr << "Reading relations for boundarys and postcodes" << std::endl;
-	osmium::relations::read_relations(input_file, boundarymp_manager, postcodemp_manager);
+	osmium::relations::read_relations(input_file, boundarymp_manager, postcodemp_manager, buildingmp_manager);
 
 	index_type		index;
 	location_handler_type	location_handler{index};
@@ -106,12 +113,15 @@ int main(int argc, char* argv[]) {
 		}),
 		postcodemp_manager.handler([&postcodeindex](osmium::memory::Buffer&& buffer) {
 			osmium::apply(buffer, postcodeindex);
+		}),
+		buildingmp_manager.handler([&buildingindex](osmium::memory::Buffer&& buffer) {
+			osmium::apply(buffer, buildingindex);
 		})
 	);
 	reader.close();
 
 	std::cerr << "Looking for addresses" << std::endl;
-	AddressHandler	ahandler{boundaryindex, postcodeindex,
+	AddressHandler	ahandler{boundaryindex, postcodeindex, buildingindex,
 		t_errors, t_missing, t_nocache, header.get("timestamp")};
 
 	osmium::io::Reader readerpass3{input_file};

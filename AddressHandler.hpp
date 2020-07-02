@@ -116,10 +116,10 @@ public:
 				std::cerr
 					<< "Set cache parent of "
 					<< lastboundary->nameofficial
-					<< " (" << lastboundary->admin_level << ") id (" << lastboundary->id << ")"
+					<< " (" << lastboundary->admin_level << ") id (" << osmium::area_id_to_object_id(lastboundary->id) << ")"
 					<< " to "
 					<< b->nameofficial
-					<< " (" << b->admin_level << ") id (" << b->id << ") "
+					<< " (" << b->admin_level << ") id (" << osmium::area_id_to_object_id(b->id) << ") "
 					<< std::endl;
 
 				lastboundary->up=b;

@@ -73,7 +73,7 @@ public:
 		std::cerr << "Boundary constructor called for "
 			<< nameofficial
 			<< std::endl << "\t"
-			<< " id " << id
+			<< " id " << osmium::area_id_to_object_id(id)
 			<< std::endl << "\t"
 			<< " name " << name
 			<< " name:prefix " << nameprefix

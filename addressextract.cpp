@@ -93,14 +93,14 @@ int main(int argc, char* argv[]) {
 
 	// We read the input file twice. In the first pass, only relations are
 	// read and fed into the multipolygon manager.
-	std::cerr << "Reading relations for boundarys and postcodes" << std::endl;
+	std::cerr << "Reading relations for boundarys, postcodes and buildings" << std::endl;
 	osmium::relations::read_relations(input_file, boundarymp_manager, postcodemp_manager, buildingmp_manager);
 
 	index_type		index;
 	location_handler_type	location_handler{index};
 	location_handler.ignore_errors();
 
-	std::cerr << "Building geometry indexes for boundarys and postcodes" << std::endl;
+	std::cerr << "Building geometry indexes for boundarys, postcodes and buildings" << std::endl;
 	osmium::io::Reader reader{input_file};
 	osmium::io::Header header{reader.header()};
 

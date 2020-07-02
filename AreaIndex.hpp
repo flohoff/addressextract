@@ -18,6 +18,7 @@ class query_visitor : public si::IVisitor {
 	query_visitor(std::vector<AT*> *l) : list(l){}
 
 	void visitNode(si::INode const& n) {
+		(void)n;
 	}
 
 	void visitData(si::IData const& d) {
@@ -108,7 +109,7 @@ public:
 			insert(a);
 		} catch (const osmium::geometry_error& e) {
 			std::cerr << "GEOMETRY ERROR: " << e.what() << "\n";
-		} catch (osmium::invalid_location) {
+		} catch (const osmium::invalid_location& e) {
 			std::cerr << "Invalid location way id " << area.orig_id() << std::endl;
 		}
 	}

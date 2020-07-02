@@ -279,11 +279,11 @@ public:
 
 			parseaddr(address, &point, way.tags());
 
-                } catch (gdalcpp::gdal_error) {
+                } catch (const gdalcpp::gdal_error& e) {
                         std::cerr << "gdal_error while creating feature wayid " << way.id()<< std::endl;
-                } catch (osmium::invalid_location) {
+                } catch (const osmium::invalid_location& e) {
                         std::cerr << "invalid location wayid " << way.id() << std::endl;
-                } catch (osmium::geometry_error) {
+                } catch (const osmium::geometry_error& e) {
                         std::cerr << "geometry error wayid " << way.id() << std::endl;
                 }
 

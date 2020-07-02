@@ -43,7 +43,7 @@ public:
 
 		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]";
 		housename_regex="^ *[0-9]* *$|GmbH|e\\. *V\\.|Sparkasse|[sS]tr\\.|[Ss]traße|http[s]*://";
-		street_regex="^ | $|Str\\.$|str\\.$|\\t|\\.$";
+		street_regex="^ | $|[,:;_#+\"/]|Str\\.$|str\\.$|\\t|\\.$";
 		postcode_regex="^[0-9]{5}$";
 
 		if (!timestamp.empty())

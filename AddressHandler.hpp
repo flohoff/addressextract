@@ -33,8 +33,6 @@ class AddressHandler : public osmium::handler::Handler {
 					housename_regex;
 	std::string			timestamp;
 	OGRPoint			point;
-	std::vector<Boundary*>		boundarylist;
-	std::vector<PostCode*>		postcodelist;
 public:
 	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, AreaIndex<Building>& buidx,
 			bool errors, bool missing, bool nocache, std::string timestamp) :
@@ -81,6 +79,8 @@ public:
 	}
 
 	void extend_city(json& address, OGRGeometry *geom) {
+		static std::vector<Boundary*>	boundarylist;
+
 		if (t_missing && address.count("city") > 0)
 			return;
 
@@ -132,6 +132,8 @@ public:
 	}
 
 	void extend_postcode(json& address, OGRGeometry *geom) {
+		static std::vector<PostCode*>	postcodelist;
+
 		// If we only want to add missing information
 		if (t_missing && address.count("postcode") > 0)
 			return;

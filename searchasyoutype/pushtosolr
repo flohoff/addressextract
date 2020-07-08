@@ -1,0 +1,23 @@
+#!/bin/sh
+
+URL=$1
+FILE=$2
+CORE=addresses
+
+curl "${URL}/${CORE}/update" \
+        -H 'Content-type:text/xml; charset=utf-8' \
+        --data '<delete><query>*:*</query></delete>'
+
+# Commit delete
+curl "${URL}/${CORE}/update" \
+        -H 'Content-type:text/xml; charset=utf-8' \
+        --data '<commit/>'
+
+# Optimize index e.g. empty it
+curl "${URL}/${CORE}/update" \
+        -H 'Content-type:text/xml; charset=utf-8' \
+        --data '<optimize/>'
+
+curl "${URL}/${CORE}/update/json?commit=true" \
+	-H 'Content-type: application/json' \
+	--data-binary @${FILE}

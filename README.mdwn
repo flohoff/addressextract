@@ -12,6 +12,7 @@ A typical address looks like this:
       "geompostcode": "33098",
       "geomsuburb": "Paderborn",
       "housenumber": "2a",
+      "housename": "foobar",
       "id": "25906061",
       "lat": "51.717383",
       "lon": "8.752651",
@@ -50,11 +51,26 @@ Build
 	cmake .
 	make
 
+Search as you type
+==================
+
+Using Debian/Buster to setup a solr:
+
+	sudo apt-get install solr-jetty jq
+	sudo cp -rav searchasyoutype/solr36conf/* /etc/solr/
+	sudo service jetty9 restart
+
+	addressextract -i <mylittlepbf | jq .addresses >addresses.json
+
+	searchasyoutype/pushtosolr http://localhost:8080/solr addresses.json
+
+Now you can query the solr for results:
+
+	curl http://localhost:8080/solr/address/?q=postcode:3333%20street:Heidestra%C3%9Fe
+
 Todo 
 ====
 
 * hausnummern mit spaces oder "," 
   z.b. "4a,b" oder "5a,5b"
-- Straßen mit spaces am anfang oder ende
-- Straßen mit "," im Namen
   33602,Bielefeld,LOOM, Bahnhofstraße,28,52.025702,8.531427,node,5202495577,33602,Bielefeld,,

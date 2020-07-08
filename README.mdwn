@@ -68,6 +68,31 @@ Now you can query the solr for results:
 
 	curl http://localhost:8080/solr/address/?q=postcode:3333%20street:Heidestra%C3%9Fe
 
+Typical query time is less than 50ms and the result looks like this:
+
+    {
+      "responseHeader": {
+        "status": 0,
+        "QTime": 13,
+        "params": {
+          "q": "postcode:33330 street:Heidestraße"
+        }
+      },
+      "response": {
+        "numFound": 26262,
+        "start": 0,
+        "docs": [
+          {
+            "city": "Gütersloh",
+            "geomcity": "Gütersloh",
+            "geompostcode": "33330",
+            "housenumber": "1c",
+            "id": "7380458133",
+            "postcode": "33330",
+            "street": "Heidestraße"
+          },
+    [ ... ]
+
 Todo 
 ====
 

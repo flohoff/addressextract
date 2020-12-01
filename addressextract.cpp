@@ -131,6 +131,4 @@ int main(int argc, char* argv[]) {
 	readerpass3.close();
 
 	ahandler.dump();
-
-	OGRRegisterAll();
 }

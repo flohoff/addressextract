@@ -10,7 +10,7 @@ class AbstractArea {
 	uint32_t				id;
 
 	~AbstractArea();
-	AbstractArea(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area);
+	AbstractArea(std::unique_ptr<OGRGeometry> geom);
 	void envelope(OGREnvelope& env);
 	bool overlaps(AbstractArea *oa);
 	bool intersects(AbstractArea *oa);

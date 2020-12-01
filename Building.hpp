@@ -11,11 +11,11 @@ class Building : public AbstractArea {
 public:
 	osmium::object_id_type	id;
 
-	json				j;
+	json			j;
 	std::string		city,postcode,street,housenumber;
 
 	Building(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
-		: AbstractArea(std::move(geom), area) {
+		: AbstractArea(std::move(geom)) {
 
 		const osmium::TagList& taglist=area.tags();
 

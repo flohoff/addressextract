@@ -10,7 +10,7 @@ AbstractArea::~AbstractArea(void ) {
 	delete(geometry);
 }
 
-AbstractArea::AbstractArea(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area) :
+AbstractArea::AbstractArea(std::unique_ptr<OGRGeometry> geom) :
 		geometry(geom.release()) {
 	id=globalid++;
 }

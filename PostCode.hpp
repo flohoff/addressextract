@@ -9,7 +9,7 @@ public:
 	std::string	postcode;
 
 	PostCode(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
-		: AbstractArea(std::move(geom), area) {
+		: AbstractArea(std::move(geom)) {
 
 		const osmium::TagList& taglist=area.tags();
 		postcode=taglist.get_value_by_key("postal_code", "");

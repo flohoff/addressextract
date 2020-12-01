@@ -28,7 +28,7 @@ public:
 	Boundary*	up=nullptr;
 
 	Boundary(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
-		: AbstractArea(std::move(geom), area) {
+		: AbstractArea(std::move(geom)) {
 
 		const osmium::TagList& taglist=area.tags();
 

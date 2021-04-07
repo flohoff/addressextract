@@ -2,7 +2,7 @@
 #define BUILDING_HPP
 
 #include <osmium/osm/area.hpp>
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 #include "AbstractArea.hpp"
 
 using json = nlohmann::json;

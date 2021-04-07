@@ -5,7 +5,7 @@
 #include <osmium/osm/node.hpp>
 #include <osmium/osm/area.hpp>
 
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 #include <regex>
 #include <string>
 #include <iostream>

@@ -5,7 +5,7 @@
 #include <osmium/osm/node.hpp>
 #include <osmium/osm/area.hpp>
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <regex>
 #include <string>
 #include <iostream>
@@ -33,6 +33,7 @@ class AddressHandler : public osmium::handler::Handler {
 					housename_regex;
 	std::string			timestamp;
 	OGRPoint			point;
+	OGREnvelope			envelope;
 public:
 	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, AreaIndex<Building>& buidx,
 			bool errors, bool missing, bool nocache, std::string timestamp) :
@@ -274,6 +275,12 @@ public:
 
 		try {
 			geom=m_factory.create_linestring(way).release();
+			const osmium::Box envelope = way.envelope();
+
+			address["bbox"].push_back(envelope.bottom_left().lon());
+			address["bbox"].push_back(envelope.bottom_left().lat());
+			address["bbox"].push_back(envelope.top_right().lon());
+			address["bbox"].push_back(envelope.top_right().lat());
 
 			geom->Centroid(&point);
 			address["lat"]=std::to_string(point.getY());
@@ -308,6 +315,11 @@ public:
 
 		address["lat"]=std::to_string(location.lat());
 		address["lon"]=std::to_string(location.lon());
+
+		address["bbox"].push_back(location.lon());
+		address["bbox"].push_back(location.lat());
+		address["bbox"].push_back(location.lon());
+		address["bbox"].push_back(location.lat());
 
 		parseaddr(address, &point, node.tags());
 	}

@@ -18,10 +18,6 @@ public:
 
 	std::string	name;
 	std::string	deplace;
-	std::string	nameprefix;
-	std::string	namesuffix;
-
-	std::string	nameofficial;
 
 	int		boundarytype=BTYPE_UNKNOWN;
 
@@ -34,27 +30,9 @@ public:
 
 		id=area.id();
 
-		name=taglist.get_value_by_key("name", "");
-		nameprefix=taglist.get_value_by_key("name:prefix", "");
-		namesuffix=taglist.get_value_by_key("name:suffix", "");
-
-		//
-		// Build official name - No documentation on the osm wiki for this
-		//
-		// Examples show:
-		//
-		//   name:prefix=Stadt
-		//   name=Werther
-		//   name:suffix=(Westf.)
-		//
-		// Or
-		//
-		//   name:prefix=Stadt
-		//   name=Halle (Westf.)
-		//
-		nameofficial=name;
-		if (namesuffix != "")
-			nameofficial.append(" ").append(namesuffix);
+		name=taglist.get_value_by_key("official_name", "");
+		if (name == "")
+			name=taglist.get_value_by_key("name", "");
 
 		admin_level_string=taglist.get_value_by_key("admin_level", "");
 		if (admin_level_string != "")
@@ -69,15 +47,12 @@ public:
 				boundarytype=BTYPE_CITY;
 		}
 
-
 		std::cerr << "Boundary constructor called for "
-			<< nameofficial
+			<< name
 			<< std::endl << "\t"
 			<< " id " << osmium::area_id_to_object_id(id)
 			<< std::endl << "\t"
 			<< " name " << name
-			<< " name:prefix " << nameprefix
-			<< " name:suffix " << namesuffix
 			<< std::endl << "\t"
 			<< " admin_level " << admin_level
 			<< " de:place " << deplace

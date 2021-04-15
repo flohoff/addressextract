@@ -64,17 +64,17 @@ public:
 	void extend_city_boundary(json& address, Boundary *b) {
 		switch(b->admin_level) {
 			case(8):
-				address["geomcity"]=b->nameofficial;
+				address["geomcity"]=b->name;
 				break;
 			case(6):
 				if (b->is_county())
-					address["geomcounty"]=b->nameofficial;
+					address["geomcounty"]=b->name;
 				else
-					address["geomcity"]=b->nameofficial;
+					address["geomcity"]=b->name;
 				break;
 			case(9):
 			case(10):
-				address["geomsuburb"]=b->nameofficial;
+				address["geomsuburb"]=b->name;
 				break;
 		}
 	}
@@ -116,10 +116,10 @@ public:
 
 				std::cerr
 					<< "Set cache parent of "
-					<< lastboundary->nameofficial
+					<< lastboundary->name
 					<< " (" << lastboundary->admin_level << ") id (" << osmium::area_id_to_object_id(lastboundary->id) << ")"
 					<< " to "
-					<< b->nameofficial
+					<< b->name
 					<< " (" << b->admin_level << ") id (" << osmium::area_id_to_object_id(b->id) << ") "
 					<< std::endl;
 

@@ -38,6 +38,17 @@ Usage
 
 	addressextract -i mylocal.pbf >addresses.json
 
+Filtering and extracting
+========================
+	
+To filter or extract addresses from the resulting json there is either the tool `addrfilter`:
+
+	addrfilter -p 33330 -i owl.json -c
+
+To export all address with postcode 33330 and dump it as CSV. An alternative is to use `jq`:
+
+	jq -r '.addresses[] | [ .id, .source, .postcode, .city, .street, .housenumber ] | @csv' owl.json
+
 Build
 =====
 

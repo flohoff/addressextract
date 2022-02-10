@@ -36,7 +36,14 @@ IF(NOT LSI_FOUND)
 	find_library(LSI_LIBRARIES spatialindex)
 ENDIF(NOT LSI_FOUND)
 
-find_path(JSON_INCLUDE_DIR json.hpp /usr/include/nlohmann/;/usr/include)
+find_path(JSON_INCLUDE_DIR
+	NAMES "nlohmann/json.hpp"
+	PATHS
+	/usr/include/
+	/usr/include/
+	${CMAKE_SOURCE_DIR}/json/include
+	)
+message("nlohmann directory ${JSON_INCLUDE_DIR}")
 
 add_executable(addressextract addressextract.cpp AbstractArea.cpp)
 include_directories("${OSMIUM_INCLUDE_DIRS}")

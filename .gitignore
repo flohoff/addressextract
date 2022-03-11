@@ -1,6 +1,7 @@
 .*
 !.gitignore
-!.travis.yml
+!.gitmodules
+!.gitlab-ci.yml
 *.zip
 *.json
 *.csv

@@ -53,12 +53,16 @@ Build
 =====
 
 	apt-get install build-essential cmake-data cmake libboost-all-dev \
-	    libspatialindex-dev libgdal-dev libbz2-dev libexpat1-dev nlohmann-json-dev
-	
+	    libspatialindex-dev libgdal-dev libbz2-dev libexpat1-dev
+
 	git clone https://github.com/flohoff/addressextract.git
 
 	cd addressextract
-	git submodule update --init
+
+	git clone https://github.com/nlohmann/json
+	git clone https://github.com/mapbox/protozero
+	git clone https://github.com/osmcode/libosmium
+
 	cmake .
 	make
 

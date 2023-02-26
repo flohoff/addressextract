@@ -32,7 +32,14 @@ include_directories(${Boost_INCLUDE_DIRS})
 find_package(PkgConfig)
 pkg_check_modules(LSI spatialindex)
 IF(NOT LSI_FOUND)
-	find_path(LSI_INCLUDE_DIRS SpatialIndex.h "/usr/include/spatialindex")
+	find_path(LSI_INCLUDE_DIRS
+			NAMES SpatialIndex.h
+			PATHS
+			/usr/include/spatialindex
+			/usr/include/spatialindex
+			${CMAKE_SYSROOT}/usr/local/include
+			${CMAKE_SYSROOT}/usr/local/include/spatialindex
+	)
 	find_library(LSI_LIBRARIES spatialindex)
 ENDIF(NOT LSI_FOUND)
 

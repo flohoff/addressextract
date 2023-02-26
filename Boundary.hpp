@@ -34,9 +34,12 @@ public:
 		if (name == "")
 			name=taglist.get_value_by_key("name", "");
 
-		admin_level_string=taglist.get_value_by_key("admin_level", "");
-		if (admin_level_string != "")
-			admin_level=std::stoi(admin_level_string);
+		try {
+			admin_level_string=taglist.get_value_by_key("admin_level", "");
+			if (admin_level_string != "")
+				admin_level=std::stoi(admin_level_string);
+		} catch(const std::invalid_argument &c) {
+		}
 
 		// Kreisfreie Städte
 		if (admin_level == 6) {

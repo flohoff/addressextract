@@ -53,6 +53,7 @@ int main(int argc, char* argv[]) {
 		("errors,e", po::bool_switch(&t_errors), "Do error analysis")
 		("missing,m", po::bool_switch(&t_missing), "Only add missing postcode and city")
 		("nocache", po::bool_switch(&t_nocache), "Do not use boundary caching")
+		("postcoderegex", po::value<std::string>()->default_value("^[0-9]{5}$"), "Postcode validation regex")
 		("infile,i", po::value<std::string>()->required(), "Input file")
 	;
 	po::variables_map vm;
@@ -121,7 +122,7 @@ int main(int argc, char* argv[]) {
 
 	std::cerr << "Looking for addresses" << std::endl;
 	AddressHandler	ahandler{boundaryindex, postcodeindex, buildingindex,
-		t_errors, t_missing, t_nocache, header.get("timestamp")};
+		t_errors, t_missing, t_nocache, header.get("timestamp"), vm["postcoderegex"].as<std::string>()};
 
 	osmium::io::Reader readerpass3{input_file};
 	osmium::apply(readerpass3,

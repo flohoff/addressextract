@@ -36,14 +36,14 @@ class AddressHandler : public osmium::handler::Handler {
 	OGREnvelope			envelope;
 public:
 	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, AreaIndex<Building>& buidx,
-			bool errors, bool missing, bool nocache, std::string timestamp) :
+			bool errors, bool missing, bool nocache, std::string timestamp, std::string postcoderegexstring) :
 		boundaryindex(bidx), postcodeindex(pidx), buildingindex(buidx),
 			t_errors(errors), t_missing(missing), t_nocache(nocache), timestamp(timestamp) {
 
 		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]";
 		housename_regex="^ *[0-9]* *$|GmbH|e\\. *V\\.|Sparkasse|[sS]tr\\.|[Ss]traße|http[s]*://";
 		street_regex="^ | $|[,:;_#+\"/]|Str\\.$|str\\.$|\\t|\\.$";
-		postcode_regex="^[0-9]{5}$";
+		postcode_regex=postcoderegexstring;
 
 		if (!timestamp.empty())
 			j["timestamp"]=timestamp;

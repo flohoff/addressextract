@@ -5,7 +5,6 @@
 #include <osmium/osm/node.hpp>
 #include <osmium/osm/area.hpp>
 
-#include <nlohmann/json.hpp>
 #include <regex>
 #include <string>
 #include <iostream>
@@ -17,8 +16,6 @@
 
 #include "Address.h"
 
-using json = nlohmann::json;
-
 bool compare_admin_level(Boundary *a, Boundary *b) { return(a->admin_level > b->admin_level); };
 
 class AddressHandler : public osmium::handler::Handler {
@@ -26,29 +23,26 @@ class AddressHandler : public osmium::handler::Handler {
 	AreaIndex<Boundary>&		boundaryindex;
 	AreaIndex<PostCode>&		postcodeindex;
 	AreaIndex<Building>&		buildingindex;
-	json				j;
-	std::vector<Address::Object>	AddressList;
+	std::vector<Address::Object>	*AddressList;
 	bool				t_errors,t_missing,t_nocache;
 	std::regex			housenumber_regex,
 					street_regex,
 					postcode_regex,
 					housename_regex;
-	std::string			timestamp;
 	OGRPoint			point;
 	OGREnvelope			envelope;
 public:
 	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, AreaIndex<Building>& buidx,
-			bool errors, bool missing, bool nocache, std::string timestamp, std::string postcoderegexstring) :
+			bool errors, bool missing, bool nocache, std::string postcoderegexstring) :
 		boundaryindex(bidx), postcodeindex(pidx), buildingindex(buidx),
-			t_errors(errors), t_missing(missing), t_nocache(nocache), timestamp(timestamp) {
+			t_errors(errors), t_missing(missing), t_nocache(nocache) {
 
 		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]";
 		housename_regex="^ *[0-9]* *$|GmbH|e\\. *V\\.|Sparkasse|[sS]tr\\.|[Ss]traße|http[s]*://";
 		street_regex="^ | $|[,:;_#+\"/]|Str\\.$|str\\.$|\\t|\\.$";
 		postcode_regex=postcoderegexstring;
 
-		if (!timestamp.empty())
-			j["timestamp"]=timestamp;
+		AddressList=new std::vector<Address::Object>;
 	}
 
 	bool isaddress(const osmium::TagList& tags) {
@@ -351,7 +345,7 @@ public:
 
 			parseaddr(address, &point, way.tags());
 
-			AddressList.push_back(address);
+			AddressList->push_back(address);
 
                 } catch (const gdalcpp::gdal_error& e) {
                         std::cerr << "gdal_error while creating feature wayid " << way.id()<< std::endl;
@@ -388,7 +382,7 @@ public:
 
 		parseaddr(address, &point, node.tags());
 
-		AddressList.push_back(address);
+		AddressList->push_back(address);
 	}
 
 	void area(const osmium::Area& area) {
@@ -402,43 +396,10 @@ public:
 
 		parseaddr(address, nullptr, area.tags());
 
-		AddressList.push_back(address);
+		AddressList->push_back(address);
 	}
 
-	void dump(void ) {
-		json	jaddrs;
-
-		for (auto& a : AddressList) {
-			json jaddr;
-
-			jaddr["id"]=a.osmobjid;
-			jaddr["source"]=a.source_string();
-
-			jaddr["lat"]=a.lat;
-			jaddr["lon"]=a.lon;
-
-			if (a.bbox[0]) {
-				json bbox;
-				for(int i=0;i<=3;i++)
-					bbox.push_back(a.bbox[i]);
-				jaddr["bbox"]=bbox;
-			}
-
-			for(auto& t : a.tags)
-				jaddr[t.info.tagshort]=t.value;
-
-			if (a.errors.size() > 0) {
-				json errors;
-				for(auto& errorstring : a.errors) {
-					errors.push_back(errorstring);
-				}
-				jaddr["errors"]=errors;
-			}
-
-			jaddrs.push_back(jaddr);
-		}
-
-		j["addresses"]=jaddrs;
-		std::cout << j << std::endl;;
+	std::vector<Address::Object> *addresslist(void ) {
+		return AddressList;
 	}
 };

@@ -24,6 +24,7 @@
 #include <osmium/index/map/flex_mem.hpp>
 
 #include <boost/program_options.hpp>
+#include <nlohmann/json.hpp>
 
 #include "Building.hpp"
 #include "Boundary.hpp"
@@ -39,37 +40,14 @@ using location_handler_type = osmium::handler::NodeLocationsForWays<index_type>;
 
 #define DEBUG 0
 
+using json = nlohmann::json;
 namespace po = boost::program_options;
 
-int main(int argc, char* argv[]) {
-	bool t_errors=false;
-	bool t_missing=false;
-	bool t_nocache=false;
+static bool t_errors=false;
+static bool t_missing=false;
+static bool t_nocache=false;
 
-	po::options_description         desc("Allowed options");
-	desc.add_options()
-		("help,h", "produce help message")
-		("errors,e", po::bool_switch(&t_errors), "Do error analysis")
-		("missing,m", po::bool_switch(&t_missing), "Only add missing postcode and city")
-		("nocache", po::bool_switch(&t_nocache), "Do not use boundary caching")
-		("postcoderegex", po::value<std::string>()->default_value("^[0-9]{5}$"), "Postcode validation regex")
-		("infile,i", po::value<std::string>()->required(), "Input file")
-	;
-	po::variables_map vm;
-	try {
-		po::store(po::parse_command_line(argc, argv, desc), vm);
-		po::notify(vm);
-	} catch(const boost::program_options::error& e) {
-		std::cerr << "Error: " << e.what() << "\n";
-		std::cout << desc << std::endl;
-		exit(-1);
-	}
-
-	if (vm.count("help")) {
-		std::cout << desc << "\n";
-		return 1;
-	}
-
+std::vector<Address::Object> *process_file(json& jfile, po::variables_map& vm) {
 	osmium::io::File input_file{vm["infile"].as<std::string>()};
 
 	osmium::area::Assembler::config_type assembler_config;
@@ -103,7 +81,11 @@ int main(int argc, char* argv[]) {
 	osmium::io::Reader reader{input_file};
 	osmium::io::Header header{reader.header()};
 
-	std::cerr << "Timestamp " << header.get("timestamp") << std::endl;
+	std::string timestamp=header.get("timestamp");
+	if (!timestamp.empty()) {
+		std::cerr << "Timestamp " << header.get("timestamp") << std::endl;
+		jfile["timestamp"]=timestamp;
+	}
 
 	osmium::apply(reader,
 		location_handler,
@@ -121,7 +103,7 @@ int main(int argc, char* argv[]) {
 
 	std::cerr << "Looking for addresses" << std::endl;
 	AddressHandler	ahandler{boundaryindex, postcodeindex, buildingindex,
-		t_errors, t_missing, t_nocache, header.get("timestamp"), vm["postcoderegex"].as<std::string>()};
+		t_errors, t_missing, t_nocache, vm["postcoderegex"].as<std::string>()};
 
 	osmium::io::Reader readerpass3{input_file};
 	osmium::apply(readerpass3,
@@ -129,5 +111,74 @@ int main(int argc, char* argv[]) {
 			ahandler);
 	readerpass3.close();
 
-	ahandler.dump();
+	std::vector<Address::Object> *addresslist=ahandler.addresslist();
+	return addresslist;
+}
+
+void addresses_dump(json& jfile, std::vector<Address::Object> *addresses) {
+	json	jaddrs;
+
+	for (auto& a : *addresses) {
+		json jaddr;
+
+		jaddr["id"]=a.osmobjid;
+		jaddr["source"]=a.source_string();
+
+		jaddr["lat"]=a.lat;
+		jaddr["lon"]=a.lon;
+
+		if (a.bbox[0]) {
+			json bbox;
+			for(int i=0;i<=3;i++)
+				bbox.push_back(a.bbox[i]);
+			jaddr["bbox"]=bbox;
+		}
+
+		for(auto& t : a.tags)
+			jaddr[t.info.tagshort]=t.value;
+
+		if (a.errors.size() > 0) {
+			json errors;
+			for(auto& errorstring : a.errors) {
+				errors.push_back(errorstring);
+			}
+			jaddr["errors"]=errors;
+		}
+
+		jaddrs.push_back(jaddr);
+	}
+
+	jfile["addresses"]=jaddrs;
+	std::cout << jfile << std::endl;;
+}
+
+int main(int argc, char* argv[]) {
+
+	po::options_description         desc("Allowed options");
+	desc.add_options()
+		("help,h", "produce help message")
+		("errors,e", po::bool_switch(&t_errors), "Do error analysis")
+		("missing,m", po::bool_switch(&t_missing), "Only add missing postcode and city")
+		("nocache", po::bool_switch(&t_nocache), "Do not use boundary caching")
+		("postcoderegex", po::value<std::string>()->default_value("^[0-9]{5}$"), "Postcode validation regex")
+		("infile,i", po::value<std::string>()->required(), "Input file")
+	;
+	po::variables_map vm;
+	try {
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		po::notify(vm);
+	} catch(const boost::program_options::error& e) {
+		std::cerr << "Error: " << e.what() << "\n";
+		std::cout << desc << std::endl;
+		exit(-1);
+	}
+
+	if (vm.count("help")) {
+		std::cout << desc << "\n";
+		return 1;
+	}
+
+	json	file;
+	std::vector<Address::Object> *addresses=process_file(file, vm);
+	addresses_dump(file, addresses);
 }

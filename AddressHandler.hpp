@@ -49,15 +49,46 @@ public:
 			j["timestamp"]=timestamp;
 	}
 
+	enum APFX {
+		APFX_ADDR=1,
+		APFX_OBJECT=2,
+		APFX_CONTACT=4
+	};
+
+	const std::list<std::pair<int, std::string>> prefixmap = {
+		{ APFX_ADDR, "addr" },
+		{ APFX_OBJECT, "object" },
+		{ APFX_CONTACT, "contact" }
+	};
+
+	const std::vector<std::pair<std::string,std::pair<int,std::string>>> addrtags={
+		{ "addr:city",		{ APFX_ADDR,	"city" } },
+		{ "addr:place",		{ APFX_ADDR,	"place" } },
+		{ "addr:postcode",	{ APFX_ADDR,	"postcode" } },
+		{ "addr:street",	{ APFX_ADDR,	"street" } },
+		{ "addr:housenumber",	{ APFX_ADDR,	"housenumber" } },
+		{ "addr:housename",	{ APFX_ADDR,	"housename" } },
+		{ "object:city",	{ APFX_OBJECT,	"city" } },
+		{ "object:place",	{ APFX_OBJECT,	"place" } },
+		{ "object:postcode",	{ APFX_OBJECT,	"postcode" } },
+		{ "object:street",	{ APFX_OBJECT,	"street" } },
+		{ "object:housenumber",	{ APFX_OBJECT,	"housenumber" } },
+		{ "object:housename",	{ APFX_OBJECT,	"housename" } },
+		{ "contact:city",	{ APFX_CONTACT,	"city" } },
+		{ "contact:place",	{ APFX_CONTACT,	"place" } },
+		{ "contact:postcode",	{ APFX_CONTACT,	"postcode" } },
+		{ "contact:street",	{ APFX_CONTACT,	"street" } },
+		{ "contact:housenumber",{ APFX_CONTACT,	"housenumber" } },
+		{ "contact:housename",	{ APFX_CONTACT,	"housename" } }
+	};
+
 	bool isaddress(const osmium::TagList& tags) {
 		if (tags.empty())
 			return false;
-		if (tags.has_key("addr:housenumber"))
-			return true;
-		if (tags.has_key("addr:street"))
-			return true;
-		if (tags.has_key("addr:city"))
-			return true;
+		for(auto &at : addrtags) {
+			if (tags.has_key(at.first.c_str()))
+				return true;
+		}
 		return false;
 	}
 
@@ -153,7 +184,36 @@ public:
 			address["postcode"]=address["geompostcode"];
 	}
 
+	constexpr int popcount(unsigned x) noexcept {
+		unsigned num{};
+		for (; x; ++num, x &= (x - 1));
+		return num;
+	}
+
+	std::string prefixes(int pfx) {
+		std::string prefixes;
+		for(auto &p : prefixmap) {
+			if (pfx & p.first)
+				prefixes+=p.second + " ";
+		}
+		return prefixes;
+	}
+
 	void checkerror(json& address, OGRGeometry *geom) {
+		int alltagprefixes=0;
+		for (auto &el : address["tagsource"].items()) {
+			int	tagprefixes=el.value();
+			alltagprefixes|=tagprefixes;
+			if (popcount(tagprefixes) > 1) {
+				std::string key=el.key();
+				address["errors"].push_back("Tag " + key + " defined with more than one prefix: " + prefixes(tagprefixes));
+			}
+		}
+
+		if (popcount(alltagprefixes) > 1) {
+			address["errors"].push_back("Address tags from multiple prefixes: " + prefixes(alltagprefixes));
+		}
+
 		if (address.count("housenumber") == 0)
 			address["errors"].push_back("No housenumber");
 		if (address.count("city") == 0)
@@ -197,6 +257,7 @@ public:
 			}
 		}
 
+
 		if (address.count("housenumber") > 0) {
 			// leading spaces
 			// trailing spaces
@@ -235,21 +296,27 @@ public:
 			}
 		}
 	}
-
-	void tag2json(json& address, const osmium::TagList& tags, const char *tagname, const char *jsonkey) {
-		const char *value=tags.get_value_by_key(tagname, nullptr);
-		if (value)
-			address[jsonkey]=value;
-	}
+	typedef	std::map<std::string,int>	sourcemap_t;
 
 	void parseaddr(json& address, OGRGeometry *geom, const osmium::TagList& tags) {
-		tag2json(address, tags, "addr:street", "street");
-		tag2json(address, tags, "addr:housenumber", "housenumber");
-		tag2json(address, tags, "addr:city", "city");
-		tag2json(address, tags, "addr:suburb", "suburb");
-		tag2json(address, tags, "addr:postcode", "postcode");
-		tag2json(address, tags, "addr:place", "place");
-		tag2json(address, tags, "addr:housename", "housename");
+		sourcemap_t	sourcemap;
+
+		for(auto &tag : addrtags) {
+			const char *value=tags.get_value_by_key(tag.first.c_str(), nullptr);
+			if (value) {
+				address[tag.second.second]=value;
+				if (t_errors)
+					sourcemap[tag.second.second]|=tag.second.first;
+			}
+		}
+
+		if (t_errors) {
+			json	tagsource;
+			for(auto &smaptag : sourcemap) {
+				tagsource[smaptag.first]=smaptag.second;
+			}
+			address["tagsource"]=tagsource;
+		}
 
 		if (geom) {
 			extend_city(address, geom);

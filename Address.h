@@ -46,6 +46,7 @@ namespace Address {
 
 		const std::vector<struct Info> InfoList= {
 			{ "addr:city",		"city",		PFX_ADDR,	TYPE_CITY },
+			{ "addr:suburb",	"suburb",	PFX_ADDR,	TYPE_SUBURB },
 			{ "addr:place",		"place",	PFX_ADDR,	TYPE_PLACE },
 			{ "addr:postcode",	"postcode",	PFX_ADDR,	TYPE_POSTCODE },
 			{ "addr:street",	"street",	PFX_ADDR,	TYPE_STREET },

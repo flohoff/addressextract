@@ -9,7 +9,6 @@
 #include <regex>
 #include <string>
 #include <iostream>
-#include <boost/format.hpp>
 
 #include "AreaIndex.hpp"
 #include "Boundary.hpp"
@@ -239,13 +238,21 @@ public:
 
 		if (address.count("postcode") > 0 && address.count("geompostcode") > 0) {
 			if (address["postcode"] != address["geompostcode"]) {
-				address["errors"].push_back("Postcode mismatch");
+				std::string error="Postcode mismatch "
+					+ address["postcode"].get<std::string>()
+					+ " vs. "
+					+ address["geompostcode"].get<std::string>();
+				address["errors"].push_back(error);
 			}
 		}
 
 		if (address.count("city") > 0  && address.count("geomcity") > 0) {
 			if (address["city"] != address["geomcity"]) {
-				address["errors"].push_back("City mismatch");
+				std::string error="City mismatch "
+					+ address["city"].get<std::string>()
+					+ " vs. "
+					+ address["geomcity"].get<std::string>();
+				address["errors"].push_back(error);
 			}
 		}
 
@@ -288,7 +295,14 @@ public:
 						&& address[key].is_string()
 						&& i->j[key] != address[key]) {
 
-						address["errors"].push_back(str(boost::format("addr:%1% mismatch to enclosing building outline") % key));
+						std::string error="addr:"
+							+ key
+							+ " mismatch to enclosing building outline "
+							+ address[key].get<std::string>()
+							+ " vs. "
+							+ i->j[key].get<std::string>();
+
+						address["errors"].push_back(error);
 					}
 				}
 

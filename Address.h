@@ -1,0 +1,108 @@
+#ifndef ADDRESS_H
+#define ADDRESS_H
+
+#include <vector>
+#include <string>
+#include <map>
+#include <list>
+
+namespace Address {
+	namespace Tag {
+		enum PREFIX {
+			PFX_GEOM=1<<0,
+			PFX_ADDR=1<<1,
+			PFX_OBJECT=1<<2,
+			PFX_CONTACT=1<<3
+		};
+
+		enum TYPE {
+			TYPE_COUNTY=1<<0,
+			TYPE_CITY=1<<1,
+			TYPE_PLACE=1<<2,
+			TYPE_SUBURB=1<<3,
+			TYPE_POSTCODE=1<<4,
+			TYPE_STREET=1<<5,
+			TYPE_HOUSENUMBER=1<<6,
+			TYPE_HOUSENAME=1<<7
+		};
+
+		struct Info {
+			std::string	tag;
+			std::string	tagshort;
+			uint8_t		tagpfxid;
+			uint8_t		tagtypeid;
+		};
+
+		const std::map<uint8_t, std::string> TagTypeMap = {
+			{ TYPE_COUNTY,		"county" },
+			{ TYPE_CITY,		"city" },
+			{ TYPE_PLACE,		"place" },
+			{ TYPE_SUBURB,		"suburb" },
+			{ TYPE_POSTCODE,	"postcode" },
+			{ TYPE_STREET,		"street" },
+			{ TYPE_HOUSENUMBER,	"housenumber" },
+			{ TYPE_HOUSENAME,	"housename" },
+		};
+
+		const std::vector<struct Info> InfoList= {
+			{ "addr:city",		"city",		PFX_ADDR,	TYPE_CITY },
+			{ "addr:place",		"place",	PFX_ADDR,	TYPE_PLACE },
+			{ "addr:postcode",	"postcode",	PFX_ADDR,	TYPE_POSTCODE },
+			{ "addr:street",	"street",	PFX_ADDR,	TYPE_STREET },
+			{ "addr:housenumber",	"housenumber",	PFX_ADDR,	TYPE_HOUSENUMBER },
+			{ "addr:housename",	"housename",	PFX_ADDR,	TYPE_HOUSENAME },
+
+			/* Internal types */
+			{ "geom:city",		"geomcity",	PFX_GEOM,	TYPE_CITY },
+			{ "geom:county",	"geomcounty",	PFX_GEOM,	TYPE_COUNTY },
+			{ "geom:suburb",	"geomsuburb",	PFX_GEOM,	TYPE_SUBURB },
+			{ "geom:postcode",	"geompostcode",	PFX_GEOM,	TYPE_POSTCODE },
+		};
+
+		class Object {
+			public:
+			const struct Info&	info;
+			std::string	value;
+
+			Object(const struct Address::Tag::Info& info, const char *value) : info(info), value(value) { };
+			uint8_t type(void ) {
+				return info.tagtypeid;
+			}
+			uint8_t pfx(void ) {
+				return info.tagpfxid;
+			}
+		};
+	}; // namespace Tag
+
+	enum SOURCE {
+		SourceRelation,
+		SourceWay,
+		SourceNode
+	};
+
+	const std::map<int, const char *> SourceStringMap={
+		{ SourceRelation, "relation" },
+		{ SourceWay, "way" },
+		{ SourceNode, "node" }
+	};
+
+	class Object {
+		public:
+			std::list<Tag::Object>	tags;
+			std::list<std::string>	errors;
+			double		lat,lon;
+			double		bbox[4];
+			uint8_t		source;
+			uint64_t	osmobjid;
+		public:
+			void tag_add(const struct Address::Tag::Info& taginfo, const char *value);
+			void tag_add_name(const char *tag, const char *value);
+			Tag::Object* tag_get(const std::string tag);
+			void error_add(const std::string error);
+			bool has_tag_type(uint8_t type);
+			Tag::Object* tag_get_by_type(uint8_t type);
+			std::string *tagvalue_get_by_type(uint8_t type);
+			const char *source_string(void );
+	};
+}; // namespace Address
+#endif

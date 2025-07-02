@@ -15,6 +15,8 @@
 #include "PostCode.hpp"
 #include "Building.hpp"
 
+#include "Address.h"
+
 using json = nlohmann::json;
 
 bool compare_admin_level(Boundary *a, Boundary *b) { return(a->admin_level > b->admin_level); };
@@ -25,6 +27,7 @@ class AddressHandler : public osmium::handler::Handler {
 	AreaIndex<PostCode>&		postcodeindex;
 	AreaIndex<Building>&		buildingindex;
 	json				j;
+	std::vector<Address::Object>	AddressList;
 	bool				t_errors,t_missing,t_nocache;
 	std::regex			housenumber_regex,
 					street_regex,
@@ -48,71 +51,39 @@ public:
 			j["timestamp"]=timestamp;
 	}
 
-	enum APFX {
-		APFX_ADDR=1,
-		APFX_OBJECT=2,
-		APFX_CONTACT=4
-	};
-
-	const std::list<std::pair<int, std::string>> prefixmap = {
-		{ APFX_ADDR, "addr" },
-		{ APFX_OBJECT, "object" },
-		{ APFX_CONTACT, "contact" }
-	};
-
-	const std::vector<std::pair<std::string,std::pair<int,std::string>>> addrtags={
-		{ "addr:city",		{ APFX_ADDR,	"city" } },
-		{ "addr:place",		{ APFX_ADDR,	"place" } },
-		{ "addr:postcode",	{ APFX_ADDR,	"postcode" } },
-		{ "addr:street",	{ APFX_ADDR,	"street" } },
-		{ "addr:housenumber",	{ APFX_ADDR,	"housenumber" } },
-		{ "addr:housename",	{ APFX_ADDR,	"housename" } },
-		{ "object:city",	{ APFX_OBJECT,	"city" } },
-		{ "object:place",	{ APFX_OBJECT,	"place" } },
-		{ "object:postcode",	{ APFX_OBJECT,	"postcode" } },
-		{ "object:street",	{ APFX_OBJECT,	"street" } },
-		{ "object:housenumber",	{ APFX_OBJECT,	"housenumber" } },
-		{ "object:housename",	{ APFX_OBJECT,	"housename" } },
-		{ "contact:city",	{ APFX_CONTACT,	"city" } },
-		{ "contact:place",	{ APFX_CONTACT,	"place" } },
-		{ "contact:postcode",	{ APFX_CONTACT,	"postcode" } },
-		{ "contact:street",	{ APFX_CONTACT,	"street" } },
-		{ "contact:housenumber",{ APFX_CONTACT,	"housenumber" } },
-		{ "contact:housename",	{ APFX_CONTACT,	"housename" } }
-	};
-
 	bool isaddress(const osmium::TagList& tags) {
 		if (tags.empty())
 			return false;
-		for(auto &at : addrtags) {
-			if (tags.has_key(at.first.c_str()))
+
+		for(auto &taginfo : Address::Tag::InfoList) {
+			if (tags.has_key(taginfo.tag.c_str()))
 				return true;
 		}
 		return false;
 	}
 
-	void extend_city_boundary(json& address, Boundary *b) {
+	void extend_city_boundary(Address::Object& address, Boundary *b) {
 		switch(b->admin_level) {
 			case(8):
-				address["geomcity"]=b->name;
+				address.tag_add_name("geom:city", b->name.c_str());
 				break;
 			case(6):
 				if (b->is_county())
-					address["geomcounty"]=b->name;
+					address.tag_add_name("geom:county", b->name.c_str());
 				else
-					address["geomcity"]=b->name;
+					address.tag_add_name("geom:city", b->name.c_str());
 				break;
 			case(9):
 			case(10):
-				address["geomsuburb"]=b->name;
+				address.tag_add_name("geom:suburb", b->name.c_str());
 				break;
 		}
 	}
 
-	void extend_city(json& address, OGRGeometry *geom) {
+	void extend_city(Address::Object& address, OGRGeometry *geom) {
 		static std::vector<Boundary*>	boundarylist;
 
-		if (t_missing && address.count("city") > 0)
+		if (t_missing && address.has_tag_type(Address::Tag::TYPE_CITY))
 			return;
 
 		boundarylist.clear();
@@ -157,16 +128,13 @@ public:
 			}
 			lastboundary=b;
 		}
-
-		if (t_missing && address.count("geomcity"))
-			address["city"]=address["geomcity"];
 	}
 
-	void extend_postcode(json& address, OGRGeometry *geom) {
+	void extend_postcode(Address::Object& address, OGRGeometry *geom) {
 		static std::vector<PostCode*>	postcodelist;
 
 		// If we only want to add missing information
-		if (t_missing && address.count("postcode") > 0)
+		if (t_missing  && address.has_tag_type(Address::Tag::TYPE_POSTCODE))
 			return;
 
 		postcodelist.clear();
@@ -174,162 +142,179 @@ public:
 		for(auto i : postcodelist) {
 			if (geom->Within(i->geometry)
 				|| geom->Overlaps(i->geometry)) {
-				address["geompostcode"]=i->postcode;
+				address.tag_add_name("geom:postcode", i->postcode.c_str());
 				break;
 			}
 		}
-
-		if (t_missing && address.count("geompostcode"))
-			address["postcode"]=address["geompostcode"];
 	}
 
-	constexpr int popcount(unsigned x) noexcept {
-		unsigned num{};
+	int popcount(unsigned x) noexcept {
+		unsigned num=0;
 		for (; x; ++num, x &= (x - 1));
 		return num;
 	}
 
-	std::string prefixes(int pfx) {
-		std::string prefixes;
-		for(auto &p : prefixmap) {
-			if (pfx & p.first)
-				prefixes+=p.second + " ";
+	void checkerror_prefixes(Address::Object& address) {
+		/* Collect bitmask */
+		std::map<int,uint8_t>	smap;
+		uint8_t			mask=0;
+
+		for(auto &tag : address.tags) {
+			/* Dont collect internals */
+			if (tag.info.tagpfxid == Address::Tag::PFX_GEOM)
+				continue;
+
+			smap[tag.type()]|=tag.info.tagpfxid;
+			mask|=tag.info.tagpfxid;
 		}
-		return prefixes;
+
+		if (popcount(mask) > 1) {
+			std::string error="Tags from multiple prefixes";
+			address.error_add(error);
+		}
+
+		for(auto const& el : smap) {
+			if (popcount(el.second) == 1)
+				continue;
+
+			/* FIXME Add list of prefixes */
+			std::string error="Tag " + Address::Tag::TagTypeMap.at(el.first) + " in multiple prefixes ";
+			address.error_add(error);
+		}
 	}
 
-	void checkerror(json& address, OGRGeometry *geom) {
-		int alltagprefixes=0;
-		for (auto &el : address["tagsource"].items()) {
-			int	tagprefixes=el.value();
-			alltagprefixes|=tagprefixes;
-			if (popcount(tagprefixes) > 1) {
-				std::string key=el.key();
-				address["errors"].push_back("Tag " + key + " defined with more than one prefix: " + prefixes(tagprefixes));
+	void checkerror_building(Address::Object& address, std::string& string, uint8_t tagtype) {
+		if (string.size() == 0)
+			return;
+
+		if (!address.has_tag_type(tagtype))
+			return;
+
+		for(auto& tag : address.tags) {
+			if (tag.type() != tagtype)
+				continue;
+
+			if (string == tag.value)
+				continue;
+
+			std::string error=tag.info.tag + " mismatch with value " + tag.value + " mismatch " + string + " to enclosing building outline";
+			address.error_add(error);
+		}
+	}
+
+	void checkerror_geom(Address::Object& address, OGRGeometry *geom) {
+		if (address.source != Address::SourceNode)
+			return;
+
+		static std::vector<Building*>	list;
+		list.clear();
+		buildingindex.findoverlapping_geom(geom, &list);
+
+		for(auto i : list) {
+			if (!geom->Within(i->geometry))
+				continue;
+
+			std::vector<std::string> comparekeys={ "city", "street", "postcode", "housenumber" };
+
+			checkerror_building(address, i->postcode, Address::Tag::TYPE_POSTCODE);
+			checkerror_building(address, i->street, Address::Tag::TYPE_STREET);
+			checkerror_building(address, i->city, Address::Tag::TYPE_CITY);
+			checkerror_building(address, i->housenumber, Address::Tag::TYPE_HOUSENUMBER);
+
+			break;
+		}
+	}
+
+	void checkerror(Address::Object& address, OGRGeometry *geom) {
+		if (!address.has_tag_type(Address::Tag::TYPE_HOUSENUMBER))
+			address.error_add("No housenumber");
+		if (!address.has_tag_type(Address::Tag::TYPE_CITY))
+			address.error_add("No city");
+		if (!address.has_tag_type(Address::Tag::TYPE_POSTCODE))
+			address.error_add("No postcode");
+		if (!address.has_tag_type(Address::Tag::TYPE_STREET) && !address.has_tag_type(Address::Tag::TYPE_PLACE))
+			address.error_add("No addr:street or addr:place");
+
+		checkerror_prefixes(address);
+
+		if (address.has_tag_type(Address::Tag::TYPE_STREET)) {
+			const Address::Tag::Object *tag=address.tag_get_by_type(Address::Tag::TYPE_STREET);
+
+			if (std::regex_search(tag->value, street_regex)) {
+				address.error_add("Street format issues");
 			}
 		}
 
-		if (popcount(alltagprefixes) > 1) {
-			address["errors"].push_back("Address tags from multiple prefixes: " + prefixes(alltagprefixes));
-		}
+		if (address.has_tag_type(Address::Tag::TYPE_POSTCODE)) {
+			const Address::Tag::Object *tag=address.tag_get_by_type(Address::Tag::TYPE_POSTCODE);
 
-		if (address.count("housenumber") == 0)
-			address["errors"].push_back("No housenumber");
-		if (address.count("city") == 0)
-			address["errors"].push_back("No city");
-		if (address.count("postcode") == 0)
-			address["errors"].push_back("No postcode");
-		if (address.count("street") == 0 && address.count("place") == 0)
-			address["errors"].push_back("No addr:street or addr:place");
-
-		if (address.count("street") > 0) {
-			std::string	street=address["street"].get<std::string>();
-			if (std::regex_search(street, street_regex)) {
-				address["errors"].push_back("Street format issues");
+			if (!std::regex_search(tag->value, postcode_regex)) {
+				address.error_add("Postcode format issues");
 			}
 		}
 
-		if (address.count("postcode") > 0) {
-			std::string	postcode=address["postcode"].get<std::string>();
-			if (!std::regex_search(postcode, postcode_regex)) {
-				address["errors"].push_back("Postcode format issues");
-			}
-		}
-
-		if (address.count("postcode") > 0 && address.count("geompostcode") > 0) {
-			if (address["postcode"] != address["geompostcode"]) {
-				std::string error="Postcode mismatch "
-					+ address["postcode"].get<std::string>()
-					+ " vs. "
-					+ address["geompostcode"].get<std::string>();
-				address["errors"].push_back(error);
-			}
-		}
-
-		if (address.count("city") > 0  && address.count("geomcity") > 0) {
-			if (address["city"] != address["geomcity"]) {
-				std::string error="City mismatch "
-					+ address["city"].get<std::string>()
-					+ " vs. "
-					+ address["geomcity"].get<std::string>();
-				address["errors"].push_back(error);
-			}
-		}
-
-		if (address.count("housename") > 0) {
-			std::string	hn=address["housename"].get<std::string>();
-
-			if (std::regex_search(hn, housename_regex)) {
-				address["errors"].push_back("Housename suspicious");
-			}
-		}
-
-
-		if (address.count("housenumber") > 0) {
-			// leading spaces
-			// trailing spaces
-			// 20,22
-			// 20;22
-			// 100 a
-			std::string	hn=address["housenumber"].get<std::string>();
-			if (std::regex_search(hn, housenumber_regex)) {
-				address["errors"].push_back("Housenumber format issues");
-			}
-		}
-
-		if (address["source"] == "node") {
-			static std::vector<Building*>	list;
-
-			list.clear();
-
-			buildingindex.findoverlapping_geom(geom, &list);
-
-			for(auto i : list) {
-				if (!geom->Within(i->geometry))
+		// FIXME - Untested
+		const Address::Tag::Object *geompostcode=address.tag_get("geom:postcode");
+		if (geompostcode) {
+			for(auto& tag : address.tags) {
+				if (tag.pfx() == Address::Tag::PFX_GEOM)
+					continue;
+				if (tag.type() != Address::Tag::TYPE_POSTCODE)
 					continue;
 
-				std::vector<std::string> comparekeys={ "city", "street", "postcode", "housenumber" };
+				if (tag.value == geompostcode->value)
+					continue;
 
-				for(auto key : comparekeys) {
-					if (i->j[key].is_string()
-						&& address[key].is_string()
-						&& i->j[key] != address[key]) {
+				std::string error="Postcode mismatch "
+					+ tag.value
+					+ " vs. "
+					+ geompostcode->value;
 
-						std::string error="addr:"
-							+ key
-							+ " mismatch to enclosing building outline "
-							+ address[key].get<std::string>()
-							+ " vs. "
-							+ i->j[key].get<std::string>();
+				address.error_add(error);
+			}
+		}
 
-						address["errors"].push_back(error);
-					}
+		const Address::Tag::Object *geomcity=address.tag_get("geom:city");
+		if (geomcity) {
+			for(auto& tag : address.tags) {
+				if (tag.pfx() == Address::Tag::PFX_GEOM)
+					continue;
+				if (tag.type() != Address::Tag::TYPE_CITY)
+					continue;
+
+				if (tag.value == geomcity->value)
+					continue;
+
+				std::string error="City mismatch "
+					+ tag.value
+					+ " vs. "
+					+ geomcity->value;
+
+				address.error_add(error);
+			}
+		}
+
+		if (address.has_tag_type(Address::Tag::TYPE_HOUSENUMBER)) {
+			for(auto& tag : address.tags) {
+				if (tag.type() != Address::Tag::TYPE_HOUSENUMBER)
+					continue;
+
+				if (std::regex_search(tag.value, housenumber_regex)) {
+					address.error_add("Housenumber format issues " + tag.value);
 				}
-
-				break;
 			}
 		}
+
+		checkerror_geom(address, geom);
 	}
-	typedef	std::map<std::string,int>	sourcemap_t;
 
-	void parseaddr(json& address, OGRGeometry *geom, const osmium::TagList& tags) {
-		sourcemap_t	sourcemap;
+	void parseaddr(Address::Object& address, OGRGeometry *geom, const osmium::TagList& tags) {
 
-		for(auto &tag : addrtags) {
-			const char *value=tags.get_value_by_key(tag.first.c_str(), nullptr);
-			if (value) {
-				address[tag.second.second]=value;
-				if (t_errors)
-					sourcemap[tag.second.second]|=tag.second.first;
-			}
-		}
-
-		if (t_errors) {
-			json	tagsource;
-			for(auto &smaptag : sourcemap) {
-				tagsource[smaptag.first]=smaptag.second;
-			}
-			address["tagsource"]=tagsource;
+		for(auto &addrtaginfo : Address::Tag::InfoList) {
+			const char *value=tags.get_value_by_key(addrtaginfo.tag.c_str(), nullptr);
+			if (!value)
+				continue;
+			address.tag_add(addrtaginfo, value);
 		}
 
 		if (geom) {
@@ -339,35 +324,34 @@ public:
 
 		if (t_errors)
 			checkerror(address, geom);
-
-		j["addresses"].push_back(address);
 	}
 
 	void way(osmium::Way& way) {
-
 		if (!isaddress(way.tags()))
 			return;
 
 		OGRGeometry	*geom=nullptr;
 
-		json		address;
-		address["source"]="way";
-		address["id"]=std::to_string(way.id());
+		Address::Object	address;
+		address.source=Address::SourceWay;
+		address.osmobjid=way.id();
 
 		try {
 			geom=m_factory.create_linestring(way).release();
 			const osmium::Box envelope = way.envelope();
 
-			address["bbox"].push_back(envelope.bottom_left().lon());
-			address["bbox"].push_back(envelope.bottom_left().lat());
-			address["bbox"].push_back(envelope.top_right().lon());
-			address["bbox"].push_back(envelope.top_right().lat());
+			address.bbox[0]=envelope.bottom_left().lon();
+			address.bbox[1]=envelope.bottom_left().lat();
+			address.bbox[2]=envelope.top_right().lon();
+			address.bbox[3]=envelope.top_right().lat();
 
 			geom->Centroid(&point);
-			address["lat"]=std::to_string(point.getY());
-			address["lon"]=std::to_string(point.getX());
+			address.lat=point.getY();
+			address.lon=point.getX();
 
 			parseaddr(address, &point, way.tags());
+
+			AddressList.push_back(address);
 
                 } catch (const gdalcpp::gdal_error& e) {
                         std::cerr << "gdal_error while creating feature wayid " << way.id()<< std::endl;
@@ -382,42 +366,79 @@ public:
 	}
 
 	void node(const osmium::Node& node) {
+		Address::Object	address;
+
 		if (!isaddress(node.tags()))
 			return;
 
-		json			address;
-
-		address["source"]="node";
-		address["id"]=std::to_string(node.id());
+		address.source=Address::SourceNode;
+		address.osmobjid=node.id();
 
 		osmium::Location location=node.location();
 		point.setX(location.lon());
 		point.setY(location.lat());
 
-		address["lat"]=std::to_string(location.lat());
-		address["lon"]=std::to_string(location.lon());
+		address.lat=location.lat();
+		address.lon=location.lon();
 
-		address["bbox"].push_back(location.lon());
-		address["bbox"].push_back(location.lat());
-		address["bbox"].push_back(location.lon());
-		address["bbox"].push_back(location.lat());
+		address.bbox[0]=location.lon();
+		address.bbox[1]=location.lat();
+		address.bbox[2]=location.lon();
+		address.bbox[3]=location.lat();
 
 		parseaddr(address, &point, node.tags());
+
+		AddressList.push_back(address);
 	}
 
 	void area(const osmium::Area& area) {
+		Address::Object	address;
+
 		if (!isaddress(area.tags()))
 			return;
 
-		json		address;
-
-		address["source"]="relation";
-		address["id"]=std::to_string(area.id());
+		address.source=Address::SourceRelation;
+		address.osmobjid=area.id();
 
 		parseaddr(address, nullptr, area.tags());
+
+		AddressList.push_back(address);
 	}
 
 	void dump(void ) {
+		json	jaddrs;
+
+		for (auto& a : AddressList) {
+			json jaddr;
+
+			jaddr["id"]=a.osmobjid;
+			jaddr["source"]=a.source_string();
+
+			jaddr["lat"]=a.lat;
+			jaddr["lon"]=a.lon;
+
+			if (a.bbox[0]) {
+				json bbox;
+				for(int i=0;i<=3;i++)
+					bbox.push_back(a.bbox[i]);
+				jaddr["bbox"]=bbox;
+			}
+
+			for(auto& t : a.tags)
+				jaddr[t.info.tagshort]=t.value;
+
+			if (a.errors.size() > 0) {
+				json errors;
+				for(auto& errorstring : a.errors) {
+					errors.push_back(errorstring);
+				}
+				jaddr["errors"]=errors;
+			}
+
+			jaddrs.push_back(jaddr);
+		}
+
+		j["addresses"]=jaddrs;
 		std::cout << j << std::endl;;
 	}
 };

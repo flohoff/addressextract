@@ -24,7 +24,6 @@
 #include <osmium/index/map/flex_mem.hpp>
 
 #include <boost/program_options.hpp>
-#include <boost/format.hpp>
 
 #include "Building.hpp"
 #include "Boundary.hpp"

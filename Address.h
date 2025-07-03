@@ -15,6 +15,13 @@ namespace Address {
 			PFX_CONTACT=1<<3
 		};
 
+		const std::map<int,std::string> PrefixMap = {
+			{ PFX_GEOM, "geom" },
+			{ PFX_ADDR, "addr" },
+			{ PFX_OBJECT, "object" },
+			{ PFX_CONTACT, "contact" }
+		};
+
 		enum TYPE {
 			TYPE_COUNTY=1<<0,
 			TYPE_CITY=1<<1,
@@ -52,6 +59,14 @@ namespace Address {
 			{ "addr:street",	"street",	PFX_ADDR,	TYPE_STREET },
 			{ "addr:housenumber",	"housenumber",	PFX_ADDR,	TYPE_HOUSENUMBER },
 			{ "addr:housename",	"housename",	PFX_ADDR,	TYPE_HOUSENAME },
+
+			{ "object:city",	"city",		PFX_OBJECT,	TYPE_CITY },
+			{ "object:suburb",	"suburb",	PFX_OBJECT,	TYPE_SUBURB },
+			{ "object:place",	"place",	PFX_OBJECT,	TYPE_PLACE },
+			{ "object:postcode",	"postcode",	PFX_OBJECT,	TYPE_POSTCODE },
+			{ "object:street",	"street",	PFX_OBJECT,	TYPE_STREET },
+			{ "object:housenumber",	"housenumber",	PFX_OBJECT,	TYPE_HOUSENUMBER },
+			{ "object:housename",	"housename",	PFX_OBJECT,	TYPE_HOUSENAME },
 
 			/* Internal types */
 			{ "geom:city",		"geomcity",	PFX_GEOM,	TYPE_CITY },

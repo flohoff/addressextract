@@ -148,6 +148,20 @@ public:
 		return num;
 	}
 
+	std::string mask_to_prefixlist(uint8_t mask) {
+		std::string	prefixes;
+		for(auto &pfx : Address::Tag::PrefixMap) {
+			if (mask & pfx.first)
+				prefixes+=pfx.second + " ";
+		}
+
+		/* Remove trailing whitespace */
+		if (prefixes.length())
+			prefixes.pop_back();
+
+		return prefixes;
+	}
+
 	void checkerror_prefixes(Address::Object& address) {
 		/* Collect bitmask */
 		std::map<int,uint8_t>	smap;
@@ -163,7 +177,7 @@ public:
 		}
 
 		if (popcount(mask) > 1) {
-			std::string error="Tags from multiple prefixes";
+			std::string error="Tags from multiple prefixes: " + mask_to_prefixlist(mask);
 			address.error_add(error);
 		}
 
@@ -171,8 +185,11 @@ public:
 			if (popcount(el.second) == 1)
 				continue;
 
-			/* FIXME Add list of prefixes */
-			std::string error="Tag " + Address::Tag::TagTypeMap.at(el.first) + " in multiple prefixes ";
+			std::string error="Tag "
+				+ Address::Tag::TagTypeMap.at(el.first)
+				+ " in multiple prefixes: "
+				+ mask_to_prefixlist(el.second);
+
 			address.error_add(error);
 		}
 	}
@@ -214,6 +231,9 @@ public:
 			checkerror_building(address, i->street, Address::Tag::TYPE_STREET);
 			checkerror_building(address, i->city, Address::Tag::TYPE_CITY);
 			checkerror_building(address, i->housenumber, Address::Tag::TYPE_HOUSENUMBER);
+
+			// FIXME check if we have "object:*" prefix and if so the building
+			// may only have "addr:*" tags.
 
 			break;
 		}

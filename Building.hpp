@@ -11,7 +11,7 @@ class Building : public AbstractArea {
 public:
 	osmium::object_id_type	id;
 
-	std::string		city,postcode,street,housenumber;
+	std::string		county,suburb,country,city,postcode,street,housenumber;
 
 	Building(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
 		: AbstractArea(std::move(geom)) {
@@ -23,6 +23,9 @@ public:
 		copyvalue(taglist, postcode, "addr:postcode");
 		copyvalue(taglist, street, "addr:street");
 		copyvalue(taglist, housenumber, "addr:housenumber");
+		copyvalue(taglist, county, "addr:county");
+		copyvalue(taglist, suburb, "addr:suburb");
+		copyvalue(taglist, country, "addr:country");
 	}
 
 	void copyvalue(const osmium::TagList& taglist, std::string& out, const char *taglistkey) {

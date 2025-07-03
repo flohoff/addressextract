@@ -8,6 +8,9 @@
 
 namespace Address {
 	namespace Tag {
+		typedef uint16_t	TagType_t;
+		typedef uint8_t		PrefixType_t;
+
 		enum PREFIX {
 			PFX_GEOM=1<<0,
 			PFX_ADDR=1<<1,
@@ -15,7 +18,7 @@ namespace Address {
 			PFX_CONTACT=1<<3
 		};
 
-		const std::map<int,std::string> PrefixMap = {
+		const std::map<PrefixType_t,std::string> PrefixMap = {
 			{ PFX_GEOM, "geom" },
 			{ PFX_ADDR, "addr" },
 			{ PFX_OBJECT, "object" },
@@ -23,24 +26,26 @@ namespace Address {
 		};
 
 		enum TYPE {
-			TYPE_COUNTY=1<<0,
-			TYPE_CITY=1<<1,
-			TYPE_PLACE=1<<2,
-			TYPE_SUBURB=1<<3,
-			TYPE_POSTCODE=1<<4,
-			TYPE_STREET=1<<5,
-			TYPE_HOUSENUMBER=1<<6,
-			TYPE_HOUSENAME=1<<7
+			TYPE_COUNTRY=1<<0,
+			TYPE_COUNTY=1<<1,
+			TYPE_CITY=1<<2,
+			TYPE_PLACE=1<<3,
+			TYPE_SUBURB=1<<4,
+			TYPE_POSTCODE=1<<5,
+			TYPE_STREET=1<<6,
+			TYPE_HOUSENUMBER=1<<7,
+			TYPE_HOUSENAME=1<<8
 		};
 
 		struct Info {
 			std::string	tag;
 			std::string	tagshort;
-			uint8_t		tagpfxid;
-			uint8_t		tagtypeid;
+			PrefixType_t	tagpfxid;
+			TagType_t	tagtypeid;
 		};
 
-		const std::map<uint8_t, std::string> TagTypeMap = {
+		const std::map<TagType_t, std::string> TagTypeMap = {
+			{ TYPE_COUNTRY,		"country" },
 			{ TYPE_COUNTY,		"county" },
 			{ TYPE_CITY,		"city" },
 			{ TYPE_PLACE,		"place" },
@@ -48,7 +53,7 @@ namespace Address {
 			{ TYPE_POSTCODE,	"postcode" },
 			{ TYPE_STREET,		"street" },
 			{ TYPE_HOUSENUMBER,	"housenumber" },
-			{ TYPE_HOUSENAME,	"housename" },
+			{ TYPE_HOUSENAME,	"housename" }
 		};
 
 		const std::vector<struct Info> InfoList= {
@@ -59,6 +64,8 @@ namespace Address {
 			{ "addr:street",	"street",	PFX_ADDR,	TYPE_STREET },
 			{ "addr:housenumber",	"housenumber",	PFX_ADDR,	TYPE_HOUSENUMBER },
 			{ "addr:housename",	"housename",	PFX_ADDR,	TYPE_HOUSENAME },
+			{ "addr:country",	"country",	PFX_ADDR,	TYPE_COUNTRY },
+			{ "addr:county",	"county",	PFX_ADDR,	TYPE_COUNTY },
 
 			{ "object:city",	"city",		PFX_OBJECT,	TYPE_CITY },
 			{ "object:suburb",	"suburb",	PFX_OBJECT,	TYPE_SUBURB },
@@ -67,6 +74,8 @@ namespace Address {
 			{ "object:street",	"street",	PFX_OBJECT,	TYPE_STREET },
 			{ "object:housenumber",	"housenumber",	PFX_OBJECT,	TYPE_HOUSENUMBER },
 			{ "object:housename",	"housename",	PFX_OBJECT,	TYPE_HOUSENAME },
+			{ "object:country",	"country",	PFX_OBJECT,	TYPE_COUNTRY },
+			{ "object:county",	"county",	PFX_OBJECT,	TYPE_COUNTRY },
 
 			/* Internal types */
 			{ "geom:city",		"geomcity",	PFX_GEOM,	TYPE_CITY },
@@ -81,14 +90,16 @@ namespace Address {
 			std::string	value;
 
 			Object(const struct Address::Tag::Info& info, const char *value) : info(info), value(value) { };
-			uint8_t type(void ) {
+			TagType_t type(void ) {
 				return info.tagtypeid;
 			}
-			uint8_t pfx(void ) {
+			PrefixType_t pfx(void ) {
 				return info.tagpfxid;
 			}
 		};
 	}; // namespace Tag
+
+	typedef uint8_t	SourceType_t;
 
 	enum SOURCE {
 		SourceRelation,
@@ -108,16 +119,16 @@ namespace Address {
 			std::list<std::string>	errors;
 			double		lat,lon;
 			double		bbox[4];
-			uint8_t		source;
+			SourceType_t	source;
 			uint64_t	osmobjid;
 		public:
 			void tag_add(const struct Address::Tag::Info& taginfo, const char *value);
 			void tag_add_name(const char *tag, const char *value);
 			Tag::Object* tag_get(const std::string tag);
 			void error_add(const std::string error);
-			bool has_tag_type(uint8_t type);
-			Tag::Object* tag_get_by_type(uint8_t type);
-			std::string *tagvalue_get_by_type(uint8_t type);
+			bool has_tag_type(Address::Tag::TagType_t type);
+			Tag::Object* tag_get_by_type(Address::Tag::TagType_t type);
+			std::string *tagvalue_get_by_type(Address::Tag::TagType_t type);
 			const char *source_string(void );
 	};
 }; // namespace Address

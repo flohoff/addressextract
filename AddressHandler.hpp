@@ -28,7 +28,8 @@ class AddressHandler : public osmium::handler::Handler {
 	std::regex			housenumber_regex,
 					street_regex,
 					postcode_regex,
-					housename_regex;
+					housename_regex,
+					country_regex;
 	OGRPoint			point;
 	OGREnvelope			envelope;
 public:
@@ -37,6 +38,7 @@ public:
 		boundaryindex(bidx), postcodeindex(pidx), buildingindex(buidx),
 			t_errors(errors), t_missing(missing), t_nocache(nocache) {
 
+		country_regex="^[A-Z][A-Z]$";
 		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]";
 		housename_regex="^ *[0-9]* *$|GmbH|e\\. *V\\.|Sparkasse|[sS]tr\\.|[Ss]traße|http[s]*://";
 		street_regex="^ | $|[,:;_#+\"/]|Str\\.$|str\\.$|\\t|\\.$";
@@ -148,7 +150,7 @@ public:
 		return num;
 	}
 
-	std::string mask_to_prefixlist(uint8_t mask) {
+	std::string mask_to_prefixlist(Address::Tag::PrefixType_t mask) {
 		std::string	prefixes;
 		for(auto &pfx : Address::Tag::PrefixMap) {
 			if (mask & pfx.first)
@@ -164,8 +166,8 @@ public:
 
 	void checkerror_prefixes(Address::Object& address) {
 		/* Collect bitmask */
-		std::map<int,uint8_t>	smap;
-		uint8_t			mask=0;
+		std::map<Address::Tag::TagType_t,Address::Tag::PrefixType_t>	smap;
+		Address::Tag::PrefixType_t	mask=0;
 
 		for(auto &tag : address.tags) {
 			/* Dont collect internals */
@@ -194,7 +196,7 @@ public:
 		}
 	}
 
-	void checkerror_building(Address::Object& address, std::string& string, uint8_t tagtype) {
+	void checkerror_building(Address::Object& address, std::string& string, Address::Tag::TagType_t tagtype) {
 		if (string.size() == 0)
 			return;
 
@@ -250,6 +252,14 @@ public:
 			address.error_add("No addr:street or addr:place");
 
 		checkerror_prefixes(address);
+
+		if (address.has_tag_type(Address::Tag::TYPE_COUNTRY)) {
+			const Address::Tag::Object *tag=address.tag_get_by_type(Address::Tag::TYPE_COUNTRY);
+
+			if (!std::regex_search(tag->value, country_regex)) {
+				address.error_add("Country format issues");
+			}
+		}
 
 		if (address.has_tag_type(Address::Tag::TYPE_STREET)) {
 			const Address::Tag::Object *tag=address.tag_get_by_type(Address::Tag::TYPE_STREET);

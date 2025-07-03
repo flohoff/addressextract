@@ -17,7 +17,7 @@ void Object::tag_add_name(const char *tag, const char *value) {
 	}
 }
 
-Tag::Object* Object::tag_get_by_type(uint8_t type) {
+Tag::Object* Object::tag_get_by_type(Address::Tag::TagType_t type) {
 	for(auto &t : tags) {
 		if (t.type() == type) {
 			return &t;
@@ -36,7 +36,7 @@ Tag::Object* Object::tag_get(const std::string tag) {
 }
 
 
-bool Object::has_tag_type(uint8_t type){
+bool Object::has_tag_type(Address::Tag::TagType_t type){
 	for(auto &t : tags) {
 		if (t.type() == type) {
 			return true;

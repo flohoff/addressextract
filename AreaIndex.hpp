@@ -48,7 +48,6 @@ class AreaIndex : public osmium::handler::Handler{
 	osmium::geom::OGRFactory<>	m_factory;
 	OGRSpatialReference		oSRS;
 public:
-	std::vector<AreaType*>		arealist;
 
 private:
 	si::Region region(AreaType *area) {

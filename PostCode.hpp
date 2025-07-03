@@ -17,8 +17,6 @@ public:
 		if (postcode == "") {
 			return;
 		}
-
-		std::cerr << "Postcode constructor called for " << postcode << std::endl;
 	}
 };
 

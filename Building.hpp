@@ -5,27 +5,23 @@
 #include <nlohmann/json.hpp>
 #include "AbstractArea.hpp"
 
+#include "Address.h"
+
 using json = nlohmann::json;
 
 class Building : public AbstractArea {
 public:
 	osmium::object_id_type	id;
 
-	std::string		county,suburb,country,city,postcode,street,housenumber;
+	Address::Object		address;
 
 	Building(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
 		: AbstractArea(std::move(geom)) {
 
-		const osmium::TagList& taglist=area.tags();
+		const osmium::TagList& tags=area.tags();
 		id=osmium::area_id_to_object_id(area.id());
 
-		copyvalue(taglist, city, "addr:city");
-		copyvalue(taglist, postcode, "addr:postcode");
-		copyvalue(taglist, street, "addr:street");
-		copyvalue(taglist, housenumber, "addr:housenumber");
-		copyvalue(taglist, county, "addr:county");
-		copyvalue(taglist, suburb, "addr:suburb");
-		copyvalue(taglist, country, "addr:country");
+		address.parse_from_tags(tags);
 	}
 
 	void copyvalue(const osmium::TagList& taglist, std::string& out, const char *taglistkey) {

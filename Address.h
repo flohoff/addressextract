@@ -1,6 +1,8 @@
 #ifndef ADDRESS_H
 #define ADDRESS_H
 
+#include <osmium/tags/tags_filter.hpp>
+
 #include <vector>
 #include <string>
 #include <map>
@@ -130,6 +132,7 @@ namespace Address {
 			Tag::Object* tag_get_by_type(Address::Tag::TagType_t type);
 			std::string *tagvalue_get_by_type(Address::Tag::TagType_t type);
 			const char *source_string(void );
+			void parse_from_tags(const osmium::TagList& tags);
 	};
 }; // namespace Address
 #endif

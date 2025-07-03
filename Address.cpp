@@ -53,4 +53,13 @@ void Object::error_add(const std::string error) {
 	errors.push_back(error);
 }
 
+void Object::parse_from_tags(const osmium::TagList& tags) {
+	for(auto &addrtaginfo : Address::Tag::InfoList) {
+		const char *value=tags.get_value_by_key(addrtaginfo.tag.c_str(), nullptr);
+		if (!value)
+			continue;
+		tag_add(addrtaginfo, value);
+	}
+}
+
 }; // namespace Address

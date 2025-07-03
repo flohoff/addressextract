@@ -196,22 +196,30 @@ public:
 		}
 	}
 
-	void checkerror_building(Address::Object& address, std::string& string, Address::Tag::TagType_t tagtype) {
-		if (string.size() == 0)
-			return;
+	void compare_enclosed_in(Address::Object& address, Address::Object& enclosed) {
 
-		if (!address.has_tag_type(tagtype))
-			return;
+		// FIXME check if we have "object:*" prefix and if so the building
+		// may only have "addr:*" tags.
+		// FIXME
+		// Currently we compare addr:street -> addr:street
+		// and ignore object:street -> addr:street
 
-		for(auto& tag : address.tags) {
-			if (tag.type() != tagtype)
+		for(auto &atag : address.tags) {
+			Address::Tag::Object* etag=enclosed.tag_get(atag.info.tag);
+
+			// FIXME Do we want to require enclosure have all tags?
+			if (!etag)
 				continue;
 
-			if (string == tag.value)
-				continue;
-
-			std::string error=tag.info.tag + " mismatch with value " + tag.value + " mismatch " + string + " to enclosing building outline";
-			address.error_add(error);
+			if (atag.value != etag->value) {
+				std::string error=atag.info.tag
+					+ " mismatch with value "
+					+ atag.value
+					+ " mismatch "
+					+ etag->value
+					+ " to enclosing building outline";
+				address.error_add(error);
+			}
 		}
 	}
 
@@ -223,19 +231,11 @@ public:
 		list.clear();
 		buildingindex.findoverlapping_geom(geom, &list);
 
-		for(auto i : list) {
+		for(auto &i : list) {
 			if (!geom->Within(i->geometry))
 				continue;
 
-			std::vector<std::string> comparekeys={ "city", "street", "postcode", "housenumber" };
-
-			checkerror_building(address, i->postcode, Address::Tag::TYPE_POSTCODE);
-			checkerror_building(address, i->street, Address::Tag::TYPE_STREET);
-			checkerror_building(address, i->city, Address::Tag::TYPE_CITY);
-			checkerror_building(address, i->housenumber, Address::Tag::TYPE_HOUSENUMBER);
-
-			// FIXME check if we have "object:*" prefix and if so the building
-			// may only have "addr:*" tags.
+			compare_enclosed_in(address, i->address);
 
 			break;
 		}
@@ -334,12 +334,7 @@ public:
 
 	void parseaddr(Address::Object& address, OGRGeometry *geom, const osmium::TagList& tags) {
 
-		for(auto &addrtaginfo : Address::Tag::InfoList) {
-			const char *value=tags.get_value_by_key(addrtaginfo.tag.c_str(), nullptr);
-			if (!value)
-				continue;
-			address.tag_add(addrtaginfo, value);
-		}
+		address.parse_from_tags(tags);
 
 		if (geom) {
 			extend_city(address, geom);

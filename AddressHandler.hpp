@@ -197,28 +197,25 @@ public:
 	}
 
 	void compare_enclosed_in(Address::Object& address, Address::Object& enclosed) {
-
-		// FIXME check if we have "object:*" prefix and if so the building
-		// may only have "addr:*" tags.
-		// FIXME
-		// Currently we compare addr:street -> addr:street
-		// and ignore object:street -> addr:street
-
 		for(auto &atag : address.tags) {
-			Address::Tag::Object* etag=enclosed.tag_get(atag.info.tag);
-
-			// FIXME Do we want to require enclosure have all tags?
-			if (!etag)
+			// We dont compare generated tags to enclosing
+			if (atag.info.tagpfxid == Address::Tag::PFX_GEOM)
 				continue;
-
-			if (atag.value != etag->value) {
-				std::string error=atag.info.tag
-					+ " mismatch with value "
-					+ atag.value
-					+ " mismatch "
-					+ etag->value
-					+ " to enclosing building outline";
-				address.error_add(error);
+			for(auto &etag : enclosed.tags) {
+				if (atag.info.tagtypeid == etag.info.tagtypeid) {
+					if (atag.value != etag.value) {
+						std::string error="Enclosing object tag mismatch "
+							+ atag.info.tag
+							+ " with value "
+							+ atag.value
+							+ " to tag "
+							+ etag.info.tag
+							+ " with value "
+							+ etag.value;
+						address.error_add(error);
+					}
+				}
+				// FIXME Do we want to require enclosure have all tags?
 			}
 		}
 	}

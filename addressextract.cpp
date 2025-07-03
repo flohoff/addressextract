@@ -53,17 +53,17 @@ std::vector<Address::Object> *process_file(json& jfile, po::variables_map& vm) {
 	osmium::area::Assembler::config_type assembler_config;
 
 
-	AreaIndex<Building>	buildingindex;
+	AreaIndex<Building>	buildingindex(100,30,2,0.5);
 	osmium::TagsFilter	buildingfilter{false};
 	buildingfilter.add_rule(true, osmium::TagMatcher{"building"});
 	osmium::area::MultipolygonManager<osmium::area::Assembler> buildingmp_manager{assembler_config, buildingfilter};
 
-	AreaIndex<Boundary>	boundaryindex;
+	AreaIndex<Boundary>	boundaryindex(10,5,2,0.5);
 	osmium::TagsFilter	boundaryfilter{false};
 	boundaryfilter.add_rule(true, "boundary", "administrative");
 	osmium::area::MultipolygonManager<osmium::area::Assembler> boundarymp_manager{assembler_config, boundaryfilter};
 
-	AreaIndex<PostCode>	postcodeindex;
+	AreaIndex<PostCode>	postcodeindex(10,5,2,0.5);
 	osmium::TagsFilter	postcodefilter{false};
 	postcodefilter.add_rule(true, osmium::TagMatcher{"boundary", "postal_code"});
 	osmium::area::MultipolygonManager<osmium::area::Assembler> postcodemp_manager{assembler_config, postcodefilter};

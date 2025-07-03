@@ -33,3 +33,21 @@ buildlatestdep:
     - ( cd build ; cmake .. )
     - make -C build
 
+buildlatesttrixie:
+  image: debian/trixie
+  stage: build
+  variables:
+    DEBIAN_FRONTEND: "noninteractive"
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
+  script:
+    - apt-get update && apt-get -fuy install git
+    - git clone ${GIT_BASE}/mirror/libosmium
+    - git clone ${GIT_BASE}/mirror/nlohmann-json json
+    - git clone ${GIT_BASE}/mirror/protozero
+    - apt-get update
+    - apt-get install -fuy build-essential cmake cmake-data libboost-all-dev libspatialindex-dev libgdal-dev libbz2-dev libexpat1-dev
+    - mkdir build
+    - ( cd build ; cmake .. )
+    - make -C build
+

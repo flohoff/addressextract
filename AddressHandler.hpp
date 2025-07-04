@@ -88,9 +88,12 @@ public:
 
 		Boundary	*lastboundary=nullptr;
 
+		boundaryindex.queries++;
 		for(auto b : boundarylist) {
+			boundaryindex.returned++;
 			if (b->admin_level > 10)
 				continue;
+			boundaryindex.compared++;
 			if (!geom->Intersects(b->geometry))
 				continue;
 
@@ -135,7 +138,10 @@ public:
 
 		postcodelist.clear();
 		postcodeindex.findoverlapping_geom(geom, &postcodelist);
+		postcodeindex.queries++;
 		for(auto i : postcodelist) {
+			postcodeindex.returned++;
+			postcodeindex.compared+=2;
 			if (geom->Within(i->geometry)
 				|| geom->Overlaps(i->geometry)) {
 				address.tag_add_name("geom:postcode", i->postcode.c_str());
@@ -227,8 +233,10 @@ public:
 		static std::vector<Building*>	list;
 		list.clear();
 		buildingindex.findoverlapping_geom(geom, &list);
-
+		buildingindex.queries++;
 		for(auto &i : list) {
+			buildingindex.returned++;
+			buildingindex.compared++;
 			if (!geom->Within(i->geometry))
 				continue;
 

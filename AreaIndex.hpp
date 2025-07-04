@@ -4,6 +4,7 @@
 #include <SpatialIndex.h>
 #include <osmium/handler.hpp>
 #include <osmium/geom/ogr.hpp>
+#include <iostream>
 
 #define DEBUG	0
 
@@ -46,6 +47,10 @@ class AreaIndex : public osmium::handler::Handler{
 
 	std::vector<AreaType*>		areavector;
 public:
+	int	returned=0;
+	int	compared=0;
+	int	queries=0;
+	int	inserts=0;
 
 private:
 	si::Region region(AreaType *area) {
@@ -103,6 +108,7 @@ public:
 		if (DEBUG)
 			std::cout << "Insert: " << area->id << std::endl;
 		rtree->insertData(0, nullptr, region(area), (uint64_t) area);
+		inserts++;
 	}
 
 	// This callback is called by osmium::apply for each area in the data.
@@ -121,6 +127,18 @@ public:
 		} catch (const osmium::invalid_location& e) {
 			std::cerr << "Invalid location way id " << area.orig_id() << std::endl;
 		}
+	}
+
+	void dump_stats(std::ostream& os) {
+		os << " Inserts: "
+			<< inserts << std::endl
+			<< " Queries: "
+			<< queries << std::endl
+			<< " Returned: "
+			<< returned << std::endl
+			<< " Compared: "
+			<< compared << std::endl
+			<< std::endl;
 	}
 };
 

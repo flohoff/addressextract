@@ -58,12 +58,12 @@ std::vector<Address::Object> *process_file(json& jfile, po::variables_map& vm) {
 	buildingfilter.add_rule(true, osmium::TagMatcher{"building"});
 	osmium::area::MultipolygonManager<osmium::area::Assembler> buildingmp_manager{assembler_config, buildingfilter};
 
-	AreaIndex<Boundary>	boundaryindex(10,5,2,0.5);
+	AreaIndex<Boundary>	boundaryindex(100,30,2,0.5);
 	osmium::TagsFilter	boundaryfilter{false};
 	boundaryfilter.add_rule(true, "boundary", "administrative");
 	osmium::area::MultipolygonManager<osmium::area::Assembler> boundarymp_manager{assembler_config, boundaryfilter};
 
-	AreaIndex<PostCode>	postcodeindex(10,5,2,0.5);
+	AreaIndex<PostCode>	postcodeindex(100,30,2,0.5);
 	osmium::TagsFilter	postcodefilter{false};
 	postcodefilter.add_rule(true, osmium::TagMatcher{"boundary", "postal_code"});
 	osmium::area::MultipolygonManager<osmium::area::Assembler> postcodemp_manager{assembler_config, postcodefilter};
@@ -110,6 +110,13 @@ std::vector<Address::Object> *process_file(json& jfile, po::variables_map& vm) {
 			location_handler,
 			ahandler);
 	readerpass3.close();
+
+	std::cerr << "Stats buildingindex: " << std::endl;
+	buildingindex.dump_stats(std::cerr);
+	std::cerr << "Stats postcodeindex: " << std::endl;
+	postcodeindex.dump_stats(std::cerr);
+	std::cerr << "Stats boundaryindex: " << std::endl;
+	boundaryindex.dump_stats(std::cerr);
 
 	std::vector<Address::Object> *addresslist=ahandler.addresslist();
 	return addresslist;

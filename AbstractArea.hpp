@@ -6,8 +6,9 @@
 
 class AbstractArea {
 	public:
-	const OGRGeometry			*geometry;
-	uint32_t				id;
+	const OGRGeometry	*geometry;
+	uint32_t		id;
+	bool			cache=false,cachewithin,cacheintersects;
 
 	~AbstractArea();
 	AbstractArea(std::unique_ptr<OGRGeometry> geom);

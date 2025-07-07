@@ -16,7 +16,19 @@
 
 #include "Address.h"
 
-bool compare_admin_level(Boundary *a, Boundary *b) { return(a->admin_level > b->admin_level); };
+static bool compare_admin_level(Boundary *a, Boundary *b) {
+	if (a->cache > b->cache) return true;
+	if (a->cache < b->cache) return false;
+
+	if (a->admin_level > b->admin_level) return true;
+	if (a->admin_level < b->admin_level) return false;
+
+	return false;
+};
+
+static bool postcode_compare(PostCode *a, PostCode *b) {
+	return(a->cache > b->cache);
+}
 
 class AddressHandler : public osmium::handler::Handler {
 	osmium::geom::OGRFactory<>      m_factory{};
@@ -76,6 +88,61 @@ public:
 		}
 	}
 
+	void extend_city_boundary_up(Address::Object& address, Boundary *b) {
+		while(b->up) {
+			b=b->up;
+			extend_city_boundary(address, b);
+		}
+	}
+
+	bool extend_city_boundary_check_intersect(Address::Object& address, Boundary *b, OGRGeometry *geom) {
+		boundaryindex.compared++;
+		if (geom->Intersects(b->geometry)) {
+			extend_city_boundary(address, b);
+			return true;
+		}
+		return false;
+	}
+
+	bool extend_city_boundary_check(Address::Object& address, Boundary *b, OGRGeometry *geom) {
+		if (b->cache) {
+			if (b->cachewithin) {
+				boundaryindex.cachehitpos++;
+				extend_city_boundary(address, b->parent);
+				return true;
+			}
+
+			if (!b->cachewithin && !b->cacheintersects) {
+				boundaryindex.cachehitneg++;
+				return false;
+			}
+			// Intersects
+		}
+		return extend_city_boundary_check_intersect(address, b, geom);
+	}
+#if 0
+	void extend_city_hierarhy(Address::Object& address, Boundary *b, Boundary *last) {
+
+		// Insert us into last admin level if its
+		// bigger - read - a smaller level.
+		if (!t_nocache
+			&& lastboundary
+			&& b->admin_level < lastboundary->admin_level
+			&& lastboundary->up == nullptr) {
+
+			std::cerr
+				<< "Set cache parent of "
+				<< lastboundary->name
+				<< " (" << lastboundary->admin_level << ") id (" << osmium::area_id_to_object_id(lastboundary->id) << ")"
+				<< " to "
+				<< b->name
+				<< " (" << b->admin_level << ") id (" << osmium::area_id_to_object_id(b->id) << ") "
+				<< std::endl;
+
+			lastboundary->up=b;
+		}
+	}
+#endif
 	void extend_city(Address::Object& address, OGRGeometry *geom) {
 		static std::vector<Boundary*>	boundarylist;
 
@@ -86,46 +153,19 @@ public:
 		boundaryindex.findoverlapping_geom(geom, &boundarylist);
 		std::sort(boundarylist.begin(), boundarylist.end(), compare_admin_level);
 
-		Boundary	*lastboundary=nullptr;
-
 		boundaryindex.queries++;
 		for(auto b : boundarylist) {
 			boundaryindex.returned++;
+
 			if (b->admin_level > 10)
 				continue;
-			boundaryindex.compared++;
-			if (!geom->Intersects(b->geometry))
-				continue;
 
-			extend_city_boundary(address, b);
+			bool hit=extend_city_boundary_check(address, b, geom);
 
-			if (!t_nocache && b->up) {
-				while(b->up) {
-					b=b->up;
-					extend_city_boundary(address, b);
-				}
+			if (!t_nocache && hit) {
+				extend_city_boundary_up(address, b);
 				break;
 			}
-
-			// Insert us into last admin level if its
-			// bigger - read - a smaller level.
-			if (!t_nocache
-				&& lastboundary
-				&& b->admin_level < lastboundary->admin_level
-				&& lastboundary->up == nullptr) {
-
-				std::cerr
-					<< "Set cache parent of "
-					<< lastboundary->name
-					<< " (" << lastboundary->admin_level << ") id (" << osmium::area_id_to_object_id(lastboundary->id) << ")"
-					<< " to "
-					<< b->name
-					<< " (" << b->admin_level << ") id (" << osmium::area_id_to_object_id(b->id) << ") "
-					<< std::endl;
-
-				lastboundary->up=b;
-			}
-			lastboundary=b;
 		}
 	}
 
@@ -139,8 +179,24 @@ public:
 		postcodelist.clear();
 		postcodeindex.findoverlapping_geom(geom, &postcodelist);
 		postcodeindex.queries++;
+		std::sort(postcodelist.begin(), postcodelist.end(), postcode_compare);
+
 		for(auto i : postcodelist) {
 			postcodeindex.returned++;
+
+			if (i->cache) {
+				if (i->cachewithin) {
+					address.tag_add_name("geom:postcode", i->parent->postcode.c_str());
+					postcodeindex.cachehitpos++;
+					break;
+				}
+				/* Would be very strange */
+				if (!i->cacheintersects && !i->cachewithin) {
+					postcodeindex.cachehitneg++;
+					continue;
+				}
+			}
+
 			postcodeindex.compared+=2;
 			if (geom->Within(i->geometry)
 				|| geom->Overlaps(i->geometry)) {

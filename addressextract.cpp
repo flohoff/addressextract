@@ -47,31 +47,68 @@ static bool t_errors=false;
 static bool t_missing=false;
 static bool t_nocache=false;
 
+void boundary_add_parent(AreaIndex<Boundary>& index, Boundary *b) {
+	if (b->cache)
+		return;
+	if (b->up)
+		return;
+
+	std::vector<Boundary*> list;
+	list.clear();
+	index.findoverlapping(b, &list);
+	std::sort(list.begin(), list.end(), compare_admin_level);
+
+	for(auto overlapb : list) {
+		if (b->id == overlapb->id)
+			continue;
+		if (b->cache)
+			continue;
+		if (b->admin_level <= overlapb->admin_level)
+			continue;
+		if (b->geometry->Within(overlapb->geometry)) {
+			std::cerr << "Setting parent admin boundary on " << b->name
+				<< " alvl " << b->admin_level
+				<< " to " << overlapb->name
+				<< " alvl " << overlapb->admin_level
+				<< std::endl;
+			b->up=overlapb;
+			break;
+		}
+	}
+}
+
+void boundaryindex_add_hierarchy(AreaIndex<Boundary>& index) {
+	for(auto b : index.areavector) {
+		boundary_add_parent(index, b);
+	}
+}
+
 std::vector<Address::Object> *process_file(json& jfile, po::variables_map& vm) {
 	osmium::io::File input_file{vm["infile"].as<std::string>()};
 
 	osmium::area::Assembler::config_type assembler_config;
 
-
-	AreaIndex<Building>	buildingindex(100,30,2,0.5);
+	AreaIndex<Building>	buildingindex(false, 100,30,2,0.5);
 	osmium::TagsFilter	buildingfilter{false};
 	buildingfilter.add_rule(true, osmium::TagMatcher{"building"});
-	osmium::area::MultipolygonManager<osmium::area::Assembler> buildingmp_manager{assembler_config, buildingfilter};
+	osmium::area::MultipolygonManager<osmium::area::Assembler>
+		buildingmp_manager{assembler_config, buildingfilter};
 
-	AreaIndex<Boundary>	boundaryindex(100,30,2,0.5);
+	AreaIndex<Boundary>	boundaryindex(!t_nocache, 100,30,2,0.5);
 	osmium::TagsFilter	boundaryfilter{false};
 	boundaryfilter.add_rule(true, "boundary", "administrative");
-	osmium::area::MultipolygonManager<osmium::area::Assembler> boundarymp_manager{assembler_config, boundaryfilter};
+	osmium::area::MultipolygonManager<osmium::area::Assembler>
+		boundarymp_manager{assembler_config, boundaryfilter};
 
-	AreaIndex<PostCode>	postcodeindex(100,30,2,0.5);
+	AreaIndex<PostCode>	postcodeindex(!t_nocache, 100,30,2,0.5);
 	osmium::TagsFilter	postcodefilter{false};
 	postcodefilter.add_rule(true, osmium::TagMatcher{"boundary", "postal_code"});
-	osmium::area::MultipolygonManager<osmium::area::Assembler> postcodemp_manager{assembler_config, postcodefilter};
+	osmium::area::MultipolygonManager<osmium::area::Assembler>
+		postcodemp_manager{assembler_config, postcodefilter};
 
-	// We read the input file twice. In the first pass, only relations are
-	// read and fed into the multipolygon manager.
 	std::cerr << "Reading relations for boundarys, postcodes and buildings" << std::endl;
-	osmium::relations::read_relations(input_file, boundarymp_manager, postcodemp_manager, buildingmp_manager);
+	osmium::relations::read_relations(input_file,
+			boundarymp_manager, postcodemp_manager, buildingmp_manager);
 
 	index_type		index;
 	location_handler_type	location_handler{index};
@@ -100,6 +137,9 @@ std::vector<Address::Object> *process_file(json& jfile, po::variables_map& vm) {
 		})
 	);
 	reader.close();
+
+	if (!t_nocache)
+		boundaryindex_add_hierarchy(boundaryindex);
 
 	std::cerr << "Looking for addresses" << std::endl;
 	AddressHandler	ahandler{boundaryindex, postcodeindex, buildingindex,

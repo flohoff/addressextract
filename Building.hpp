@@ -14,6 +14,7 @@ public:
 	osmium::object_id_type	id;
 
 	Address::Object		address;
+	Building		*parent;
 
 	Building(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
 		: AbstractArea(std::move(geom)) {

@@ -7,6 +7,7 @@
 class PostCode : public AbstractArea {
 public:
 	std::string	postcode;
+	PostCode	*parent;
 
 	PostCode(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
 		: AbstractArea(std::move(geom)) {

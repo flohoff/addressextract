@@ -22,6 +22,7 @@ public:
 	int		boundarytype=BTYPE_UNKNOWN;
 
 	Boundary*	up=nullptr;
+	Boundary*	parent=nullptr;
 
 	Boundary(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
 		: AbstractArea(std::move(geom)) {
@@ -50,6 +51,7 @@ public:
 				boundarytype=BTYPE_CITY;
 		}
 
+#if 0
 		std::cerr << "Boundary constructor called for "
 			<< name
 			<< std::endl << "\t"
@@ -61,6 +63,7 @@ public:
 			<< " de:place " << deplace
 			<< " boundarytype " << boundarytype
 			<< std::endl;
+#endif
 	}
 
 	bool is_county(void ) {

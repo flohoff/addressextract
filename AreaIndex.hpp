@@ -33,7 +33,8 @@ class query_visitor : public si::IVisitor {
 };
 
 template <typename AreaType>
-class AreaIndex : public osmium::handler::Handler{
+class AreaIndex : public osmium::handler::Handler {
+	bool		cachegrid=false;
 	std::unique_ptr<si::IStorageManager>	sm;
 	std::unique_ptr<si::ISpatialIndex>	rtree;
 
@@ -45,12 +46,16 @@ class AreaIndex : public osmium::handler::Handler{
 	osmium::geom::OGRFactory<>	m_factory;
 	OGRSpatialReference		oSRS;
 
-	std::vector<AreaType*>		areavector;
 public:
+	std::vector<AreaType*>		areavector;
+
 	int	returned=0;
 	int	compared=0;
 	int	queries=0;
 	int	inserts=0;
+	int	cachehitpos=0;
+	int	cachehitneg=0;
+	int	cacheentriespos=0;
 
 private:
 	si::Region region(AreaType *area) {
@@ -68,7 +73,8 @@ private:
 	}
 
 public:
-	AreaIndex(int icapacity, int lcapacity, int dim, double fill) :
+	AreaIndex(bool cachegrid, int icapacity, int lcapacity, int dim, double fill) :
+		cachegrid(cachegrid),
 		sm(si::StorageManager::createNewMemoryStorageManager()),
 		rtree(si::RTree::createNewRTree(*sm, fill, icapacity, lcapacity, dim, si::RTree::RV_LINEAR, index_id)) {
 
@@ -104,38 +110,110 @@ public:
 		rtree->intersectsWithQuery(region, qvisitor);
 	}
 
-	void insert(AreaType *area) {
+	std::vector<std::unique_ptr<OGRGeometry>> grid_generate(double minX, double minY, double maxX, double maxY) {
+		std::vector<std::unique_ptr<OGRGeometry>>	grid;
+
+		double	stepX=(maxX-minX)/16;
+		double	stepY=(maxY-minY)/16;
+
+		double nminX=minX;
+		double nminY=minY;
+
+		for(double X=minX+stepX;X<=maxX;X+=stepX) {
+			for(double Y=minY+stepY;Y<=maxY;Y+=stepY) {
+
+				auto ring=std::unique_ptr<OGRLinearRing>(new OGRLinearRing());
+
+				ring->addPoint(nminX, nminY);
+				ring->addPoint(nminX, Y);
+				ring->addPoint(X, Y);
+				ring->addPoint(X, nminY);
+				ring->addPoint(nminX, nminY);
+				ring->assignSpatialReference(&oSRS);
+
+				auto geom=std::unique_ptr<OGRPolygon>(new OGRPolygon());
+				geom->addRingDirectly(ring.release());
+
+				grid.push_back(std::move(geom));
+
+				nminY=Y;
+			}
+
+			nminX=X;
+			nminY=minY;
+		}
+
+		return grid;
+	}
+
+	void insert_cache_grid(AreaType *area, const osmium::Area& osmarea) {
+		OGREnvelope	env;
+		area->envelope(env);
+
+		auto grid=grid_generate(env.MinX, env.MinY, env.MaxX, env.MaxY);
+		while(!grid.empty()) {
+			std::unique_ptr<OGRGeometry> g=std::move(grid.back());
+			grid.pop_back();
+
+			AreaType *cachea=new AreaType(std::move(g), osmarea);
+
+			cachea->cache=true;
+			cachea->cachewithin=cachea->geometry->Within(area->geometry);
+			cachea->cacheintersects=cachea->geometry->Intersects(area->geometry);
+			cachea->parent=area;
+
+			/* Only insert positive entries */
+			if (cachea->cachewithin) {
+				cacheentriespos++;
+				rtree->insertData(0, nullptr, region(cachea), (uint64_t) cachea);
+			} else {
+				delete(cachea);
+			}
+		}
+	}
+
+	void insert(AreaType *area, const osmium::Area& osmarea) {
 		if (DEBUG)
 			std::cout << "Insert: " << area->id << std::endl;
+
 		rtree->insertData(0, nullptr, region(area), (uint64_t) area);
 		inserts++;
+
+		if (cachegrid)
+			insert_cache_grid(area, osmarea);
 	}
 
 	// This callback is called by osmium::apply for each area in the data.
-	void area(const osmium::Area& area) {
+	void area(const osmium::Area& osmarea) {
 		try {
-			std::unique_ptr<OGRGeometry>	geom=m_factory.create_multipolygon(area);
+			std::unique_ptr<OGRGeometry>	geom=m_factory.create_multipolygon(osmarea);
 			geom->assignSpatialReference(&oSRS);
 
-			AreaType	*a=new AreaType(std::move(geom), area);
+			AreaType	*a=new AreaType(std::move(geom), osmarea);
 			areavector.push_back(a);
 
-			insert(a);
+			insert(a, osmarea);
 
 		} catch (const osmium::geometry_error& e) {
 			std::cerr << "GEOMETRY ERROR: " << e.what() << "\n";
 		} catch (const osmium::invalid_location& e) {
-			std::cerr << "Invalid location way id " << area.orig_id() << std::endl;
+			std::cerr << "Invalid location way id " << osmarea.orig_id() << std::endl;
 		}
 	}
 
 	void dump_stats(std::ostream& os) {
 		os << " Inserts: "
 			<< inserts << std::endl
+			<< " Cacheentriespos: "
+			<< cacheentriespos << std::endl
 			<< " Queries: "
 			<< queries << std::endl
 			<< " Returned: "
 			<< returned << std::endl
+			<< " Cachehitpos: "
+			<< cachehitpos << std::endl
+			<< " Cachehitneg: "
+			<< cachehitneg << std::endl
 			<< " Compared: "
 			<< compared << std::endl
 			<< std::endl;

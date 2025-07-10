@@ -10,12 +10,15 @@ class AbstractArea {
 	uint32_t		id;
 	bool			cache=false,cachewithin,cacheintersects;
 
-	~AbstractArea();
+	virtual ~AbstractArea();
 	AbstractArea(std::unique_ptr<OGRGeometry> geom);
 	void envelope(OGREnvelope& env);
 	bool overlaps(AbstractArea *oa);
 	bool intersects(AbstractArea *oa);
 	void dump(void);
+	virtual bool valid(void) {
+		return true;
+	};
 };
 
 #endif

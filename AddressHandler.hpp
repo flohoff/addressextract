@@ -200,6 +200,7 @@ public:
 			postcodeindex.compared+=2;
 			if (geom->Within(i->geometry)
 				|| geom->Overlaps(i->geometry)) {
+
 				address.tag_add_name("geom:postcode", i->postcode.c_str());
 				break;
 			}

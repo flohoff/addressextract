@@ -3,6 +3,7 @@
 
 #include <osmium/osm/area.hpp>
 #include "AbstractArea.hpp"
+#include <iostream>
 
 class PostCode : public AbstractArea {
 public:
@@ -14,10 +15,14 @@ public:
 
 		const osmium::TagList& taglist=area.tags();
 		postcode=taglist.get_value_by_key("postal_code", "");
+	}
 
-		if (postcode == "") {
-			return;
-		}
+	bool valid(void ) {
+		if (postcode == "")
+			return false;
+		if (postcode.length() == 0)
+			return false;
+		return true;
 	}
 };
 

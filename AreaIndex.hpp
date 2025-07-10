@@ -190,6 +190,12 @@ public:
 			geom->assignSpatialReference(&oSRS);
 
 			AreaType	*a=new AreaType(std::move(geom), osmarea);
+
+			if (!a->valid()) {
+				delete(a);
+				return;
+			}
+
 			areavector.push_back(a);
 
 			insert(a, osmarea);

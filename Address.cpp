@@ -45,6 +45,10 @@ bool Object::has_tag_type(Address::Tag::TagType_t type){
 	return false;
 }
 
+int Object::tag_num(void ) {
+	return tags.size();
+}
+
 const char *Object::source_string(void ) {
 	return Address::SourceStringMap.at(source);
 }

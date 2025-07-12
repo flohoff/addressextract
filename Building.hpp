@@ -31,6 +31,10 @@ public:
 			return;
 		out=value;
 	}
+
+	bool valid(void ) {
+		return address.tag_num() > 0;
+	}
 };
 
 #endif

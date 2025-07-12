@@ -129,6 +129,7 @@ namespace Address {
 			Tag::Object* tag_get(const std::string tag);
 			void error_add(const std::string error);
 			bool has_tag_type(Address::Tag::TagType_t type);
+			int tag_num(void );
 			Tag::Object* tag_get_by_type(Address::Tag::TagType_t type);
 			std::string *tagvalue_get_by_type(Address::Tag::TagType_t type);
 			const char *source_string(void );

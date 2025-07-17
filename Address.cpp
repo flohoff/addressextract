@@ -38,7 +38,7 @@ Tag::Object* Object::tag_get(const std::string tag) {
 
 bool Object::has_tag_type(Address::Tag::TagType_t type){
 	for(auto &t : tags) {
-		if (t.type() == type) {
+		if (t.type() == type && t.pfx() != Address::Tag::PFX_GEOM) {
 			return true;
 		}
 	}

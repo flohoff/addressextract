@@ -120,33 +120,11 @@ public:
 		}
 		return extend_city_boundary_check_intersect(address, b, geom);
 	}
-#if 0
-	void extend_city_hierarhy(Address::Object& address, Boundary *b, Boundary *last) {
 
-		// Insert us into last admin level if its
-		// bigger - read - a smaller level.
-		if (!t_nocache
-			&& lastboundary
-			&& b->admin_level < lastboundary->admin_level
-			&& lastboundary->up == nullptr) {
-
-			std::cerr
-				<< "Set cache parent of "
-				<< lastboundary->name
-				<< " (" << lastboundary->admin_level << ") id (" << osmium::area_id_to_object_id(lastboundary->id) << ")"
-				<< " to "
-				<< b->name
-				<< " (" << b->admin_level << ") id (" << osmium::area_id_to_object_id(b->id) << ") "
-				<< std::endl;
-
-			lastboundary->up=b;
-		}
-	}
-#endif
 	void extend_city(Address::Object& address, OGRGeometry *geom) {
 		static std::vector<Boundary*>	boundarylist;
 
-		if (t_missing && address.has_tag_type(Address::Tag::TYPE_CITY))
+		if (!t_missing && !t_errors)
 			return;
 
 		boundarylist.clear();
@@ -172,8 +150,7 @@ public:
 	void extend_postcode(Address::Object& address, OGRGeometry *geom) {
 		static std::vector<PostCode*>	postcodelist;
 
-		// If we only want to add missing information
-		if (t_missing  && address.has_tag_type(Address::Tag::TYPE_POSTCODE))
+		if (!t_missing && !t_errors)
 			return;
 
 		postcodelist.clear();

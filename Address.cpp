@@ -5,7 +5,7 @@
 namespace Address {
 
 void Object::tag_add(const struct Address::Tag::Info& taginfo, const char *value) {
-	tags.emplace_back(Address::Tag::Object(taginfo, value));
+	tags.emplace_back(taginfo, value);
 }
 
 void Object::tag_add_name(const char *tag, const char *value) {

@@ -26,7 +26,7 @@ Tag::Object* Object::tag_get_by_type(Address::Tag::TagType_t type) {
 	return nullptr;
 }
 
-Tag::Object* Object::tag_get(const std::string tag) {
+Tag::Object* Object::tag_get(const std::string& tag) {
 	for(auto &t : tags) {
 		if (t.info.tag == tag) {
 			return &t;

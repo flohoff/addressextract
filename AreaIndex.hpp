@@ -160,8 +160,8 @@ public:
 			AreaType *cachea=new AreaType(std::move(g), osmarea);
 
 			cachea->cache=true;
-			cachea->cachewithin=cachea->geometry->Within(area->geometry);
-			cachea->cacheintersects=cachea->geometry->Intersects(area->geometry);
+			cachea->cachewithin=cachea->geometry->Within(area->geometry.get());
+			cachea->cacheintersects=cachea->geometry->Intersects(area->geometry.get());
 			cachea->parent=area;
 
 			/* Only insert positive entries */

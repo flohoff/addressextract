@@ -6,11 +6,11 @@
 
 class AbstractArea {
 	public:
-	const OGRGeometry	*geometry;
-	uint32_t		id;
-	bool			cache=false,cachewithin,cacheintersects;
+	std::unique_ptr<OGRGeometry>	geometry;
+	uint32_t			id;
+	bool				cache=false,cachewithin,cacheintersects;
 
-	virtual ~AbstractArea();
+	virtual ~AbstractArea() = default;
 	AbstractArea(std::unique_ptr<OGRGeometry> geom);
 	void envelope(OGREnvelope& env);
 	bool overlaps(AbstractArea *oa);

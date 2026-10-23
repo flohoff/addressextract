@@ -6,12 +6,8 @@
 
 static uint64_t	globalid=0;
 
-AbstractArea::~AbstractArea(void ) {
-	delete(geometry);
-}
-
 AbstractArea::AbstractArea(std::unique_ptr<OGRGeometry> geom) :
-		geometry(geom.release()) {
+		geometry(std::move(geom)) {
 	id=globalid++;
 }
 
@@ -20,13 +16,13 @@ void AbstractArea::envelope(OGREnvelope& env) {
 }
 
 bool AbstractArea::overlaps(AbstractArea *oa) {
-	return geometry->Overlaps(oa->geometry)
-		|| geometry->Contains(oa->geometry)
-		|| geometry->Within(oa->geometry);
+	return geometry->Overlaps(oa->geometry.get())
+		|| geometry->Contains(oa->geometry.get())
+		|| geometry->Within(oa->geometry.get());
 }
 
 bool AbstractArea::intersects(AbstractArea *oa) {
-	return geometry->Overlaps(oa->geometry);
+	return geometry->Overlaps(oa->geometry.get());
 }
 
 void AbstractArea::dump(void ) {

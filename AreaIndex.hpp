@@ -103,16 +103,19 @@ public:
 		rtree->intersectsWithQuery(region, qvisitor);
 	}
 
+#define GRID_NUM_CELL_XY	16
+#define GRID_NUM_CELLS		(GRID_NUM_CELL_XY*GRID_NUM_CELL_XY)
+
 	std::vector<std::unique_ptr<OGRGeometry>> grid_generate(double minX, double minY, double maxX, double maxY) {
 		std::vector<std::unique_ptr<OGRGeometry>>	grid;
 
-		double	stepX=(maxX-minX)/16;
-		double	stepY=(maxY-minY)/16;
+		double	stepX=(maxX-minX)/GRID_NUM_CELL_XY;
+		double	stepY=(maxY-minY)/GRID_NUM_CELL_XY;
 
 		double nminX=minX;
 		double nminY=minY;
 
-		grid.reserve(stepX*stepY);
+		grid.reserve(GRID_NUM_CELLS);
 
 		for(double X=minX+stepX;X<=maxX;X+=stepX) {
 			for(double Y=minY+stepY;Y<=maxY;Y+=stepY) {

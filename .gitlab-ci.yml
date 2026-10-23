@@ -1,5 +1,12 @@
+---
 
-buildstable:
+variables:
+  LIBOSMIUM_STABLE_VERSION: v2.23.1
+  NLOHMANN_STABLE_VERSION: v3.11.3
+  PROTOZERO_STABLE_VERSION: v1.8.2
+
+buildstabletrixie:
+  image: amd64/debian:trixie
   stage: build
   variables:
     DEBIAN_FRONTEND: "noninteractive"
@@ -7,27 +14,9 @@ buildstable:
     GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
   script:
     - apt-get update && apt-get -fuy install git
-    - git clone ${GIT_BASE}/mirror/libosmium && git -C libosmium checkout -b build fd106ff08d8774e065e3ff0d505c91e540ff1d2c
-    - git clone ${GIT_BASE}/mirror/nlohmann-json json && git -C json checkout -b build v3.10.1
-    - git clone ${GIT_BASE}/mirror/protozero && git -C protozero checkout -b build 23d48fd2a441c6e3b2852ff84a0ba398e48f74be
-    - apt-get update
-    - apt-get install -fuy build-essential cmake cmake-data libboost-all-dev libspatialindex-dev libgdal-dev libbz2-dev libexpat1-dev
-    - mkdir build
-    - ( cd build ; cmake .. )
-    - make -C build
-
-buildlatestdep:
-  image: amd64/debian:bookworm
-  stage: build
-  variables:
-    DEBIAN_FRONTEND: "noninteractive"
-    GIT_SUBMODULE_STRATEGY: recursive
-    GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
-  script:
-    - apt-get update && apt-get -fuy install git
-    - git clone ${GIT_BASE}/mirror/libosmium
-    - git clone ${GIT_BASE}/mirror/nlohmann-json json
-    - git clone ${GIT_BASE}/mirror/protozero
+    - git clone ${GIT_BASE}/mirror/libosmium && git -C libosmium checkout -b build $LIBOSMIUM_STABLE_VERSION
+    - git clone ${GIT_BASE}/mirror/nlohmann-json json && git -C json checkout -b build $NLOHMANN_STABLE_VERSION
+    - git clone ${GIT_BASE}/mirror/protozero && git -C protozero checkout -b build $PROTOZERO_STABLE_VERSION
     - apt-get update
     - apt-get install -fuy build-essential cmake cmake-data libboost-all-dev libspatialindex-dev libgdal-dev libbz2-dev libexpat1-dev
     - mkdir build

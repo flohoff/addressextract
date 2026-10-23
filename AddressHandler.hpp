@@ -393,7 +393,7 @@ public:
 		address.osmobjid=way.id();
 
 		try {
-			std::unique_ptr<OGRGeometry> geom(m_factory.create_linestring(way).release());
+			auto geom=m_factory.create_linestring(way);
 			const osmium::Box envelope = way.envelope();
 
 			address.bbox[0]=envelope.bottom_left().lon();

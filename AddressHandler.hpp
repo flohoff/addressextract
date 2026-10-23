@@ -35,7 +35,7 @@ class AddressHandler : public osmium::handler::Handler {
 	AreaIndex<Boundary>&		boundaryindex;
 	AreaIndex<PostCode>&		postcodeindex;
 	AreaIndex<Building>&		buildingindex;
-	std::vector<Address::Object>	*AddressList;
+	std::vector<Address::Object>	AddressList;
 	bool				t_errors,t_missing,t_nocache;
 	std::regex			housenumber_regex,
 					street_regex,
@@ -55,8 +55,6 @@ public:
 		housename_regex="^ *[0-9]* *$|GmbH|e\\. *V\\.|Sparkasse|[sS]tr\\.|[Ss]traße|http[s]*://";
 		street_regex="^ | $|[,:;_#+\"/]|Str\\.$|str\\.$|\\t|\\.$";
 		postcode_regex=postcoderegexstring;
-
-		AddressList=new std::vector<Address::Object>;
 	}
 
 	bool isaddress(const osmium::TagList& tags) {
@@ -405,7 +403,7 @@ public:
 
 			parseaddr(address, &point, way.tags());
 
-			AddressList->push_back(std::move(address));
+			AddressList.push_back(std::move(address));
 
                 } catch (const gdalcpp::gdal_error& e) {
                         std::cerr << "gdal_error while creating feature wayid " << way.id()<< std::endl;
@@ -439,7 +437,7 @@ public:
 
 		parseaddr(address, &point, node.tags());
 
-		AddressList->push_back(std::move(address));
+		AddressList.push_back(std::move(address));
 	}
 
 	void area(const osmium::Area& area) {
@@ -453,10 +451,10 @@ public:
 
 		parseaddr(address, nullptr, area.tags());
 
-		AddressList->push_back(std::move(address));
+		AddressList.push_back(std::move(address));
 	}
 
-	std::vector<Address::Object> *addresslist(void ) {
+	std::vector<Address::Object>& addresslist(void ) {
 		return AddressList;
 	}
 };

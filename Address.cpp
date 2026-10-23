@@ -49,7 +49,7 @@ int Object::tag_num(void ) {
 	return tags.size();
 }
 
-const char *Object::source_string(void ) {
+const char *Object::source_string(void ) const {
 	return Address::SourceStringMap.at(source);
 }
 

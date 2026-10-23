@@ -83,7 +83,7 @@ void boundaryindex_add_hierarchy(AreaIndex<Boundary>& index) {
 	}
 }
 
-std::vector<Address::Object> *process_file(json& jfile, po::variables_map& vm) {
+std::vector<Address::Object> process_file(json& jfile, po::variables_map& vm) {
 	osmium::io::File input_file{vm["infile"].as<std::string>()};
 
 	osmium::area::Assembler::config_type assembler_config;
@@ -158,14 +158,13 @@ std::vector<Address::Object> *process_file(json& jfile, po::variables_map& vm) {
 	std::cerr << "Stats boundaryindex: " << std::endl;
 	boundaryindex.dump_stats(std::cerr);
 
-	std::vector<Address::Object> *addresslist=ahandler.addresslist();
-	return addresslist;
+	return std::move(ahandler.addresslist());
 }
 
-void addresses_dump(json& jfile, std::vector<Address::Object> *addresses) {
+void addresses_dump(json& jfile, const std::vector<Address::Object>& addresses) {
 	json	jaddrs;
 
-	for (auto& a : *addresses) {
+	for (auto& a : addresses) {
 		json jaddr;
 
 		jaddr["id"]=a.osmobjid;
@@ -226,6 +225,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	json	file;
-	std::vector<Address::Object> *addresses=process_file(file, vm);
+	std::vector<Address::Object> addresses=process_file(file, vm);
 	addresses_dump(file, addresses);
 }

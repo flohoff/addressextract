@@ -388,8 +388,6 @@ public:
 		if (!isaddress(way.tags()))
 			return;
 
-		std::unique_ptr<OGRGeometry>	geom;
-
 		Address::Object	address;
 		address.source=Address::SourceWay;
 		address.osmobjid=way.id();

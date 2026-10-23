@@ -149,11 +149,8 @@ public:
 		area->envelope(env);
 
 		auto grid=grid_generate(env.MinX, env.MinY, env.MaxX, env.MaxY);
-		while(!grid.empty()) {
-			std::unique_ptr<OGRGeometry> g=std::move(grid.back());
-			grid.pop_back();
-
-			auto cachea=std::make_unique<AreaType>(std::move(g), osmarea);
+		for(auto& gentry : grid) {
+			auto cachea=std::make_unique<AreaType>(std::move(gentry), osmarea);
 
 			cachea->cache=true;
 			cachea->cachewithin=cachea->geometry->Within(area->geometry.get());

@@ -47,7 +47,7 @@ class AreaIndex : public osmium::handler::Handler {
 	OGRSpatialReference		oSRS;
 
 public:
-	std::vector<AreaType*>		areavector;
+	std::vector<std::unique_ptr<AreaType>>		areavector;
 
 	int	returned=0;
 	int	compared=0;
@@ -79,14 +79,6 @@ public:
 		rtree(si::RTree::createNewRTree(*sm, fill, icapacity, lcapacity, dim, si::RTree::RV_LINEAR, index_id)) {
 
 		oSRS.importFromEPSG(4326);
-	}
-
-	~AreaIndex() {
-		while(!areavector.empty()) {
-			AreaType *at=areavector.back();
-			areavector.pop_back();
-			delete(at);
-		}
 	}
 
 	void findoverlapping(AreaType *area, std::vector<AreaType*> *list) {
@@ -191,16 +183,13 @@ public:
 			std::unique_ptr<OGRGeometry>	geom=m_factory.create_multipolygon(osmarea);
 			geom->assignSpatialReference(&oSRS);
 
-			AreaType	*a=new AreaType(std::move(geom), osmarea);
+			auto a=std::make_unique<AreaType>(std::move(geom), osmarea);
 
-			if (!a->valid()) {
-				delete(a);
+			if (!a->valid())
 				return;
-			}
 
-			areavector.push_back(a);
-
-			insert(a, osmarea);
+			areavector.push_back(std::move(a));
+			insert(areavector.back().get(), osmarea);
 
 		} catch (const osmium::geometry_error& e) {
 			std::cerr << "GEOMETRY ERROR: " << e.what() << "\n";

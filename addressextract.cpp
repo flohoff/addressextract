@@ -78,8 +78,8 @@ void boundary_add_parent(AreaIndex<Boundary>& index, Boundary *b) {
 }
 
 void boundaryindex_add_hierarchy(AreaIndex<Boundary>& index) {
-	for(auto b : index.areavector) {
-		boundary_add_parent(index, b);
+	for(auto& b : index.areavector) {
+		boundary_add_parent(index, b.get());
 	}
 }
 

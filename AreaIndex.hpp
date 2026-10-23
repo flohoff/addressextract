@@ -48,6 +48,7 @@ class AreaIndex : public osmium::handler::Handler {
 
 public:
 	std::vector<std::unique_ptr<AreaType>>		areavector;
+	std::vector<std::unique_ptr<AreaType>>		cachevector;
 
 	int	returned=0;
 	int	compared=0;
@@ -149,7 +150,7 @@ public:
 			std::unique_ptr<OGRGeometry> g=std::move(grid.back());
 			grid.pop_back();
 
-			AreaType *cachea=new AreaType(std::move(g), osmarea);
+			auto cachea=std::make_unique<AreaType>(std::move(g), osmarea);
 
 			cachea->cache=true;
 			cachea->cachewithin=cachea->geometry->Within(area->geometry.get());
@@ -159,9 +160,8 @@ public:
 			/* Only insert positive entries */
 			if (cachea->cachewithin) {
 				cacheentriespos++;
-				rtree->insertData(0, nullptr, region(cachea), (uint64_t) cachea);
-			} else {
-				delete(cachea);
+				rtree->insertData(0, nullptr, region(cachea.get()), (uint64_t) cachea.get());
+				cachevector.push_back(std::move(cachea));
 			}
 		}
 	}

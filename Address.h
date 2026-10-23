@@ -117,12 +117,12 @@ namespace Address {
 
 	class Object {
 		public:
-			std::list<Tag::Object>	tags;
-			std::list<std::string>	errors;
-			double		lat,lon;
-			double		bbox[4];
-			SourceType_t	source;
-			uint64_t	osmobjid;
+			std::vector<Tag::Object>	tags;
+			std::vector<std::string>	errors;
+			double				lat,lon;
+			double				bbox[4];
+			SourceType_t			source;
+			uint64_t			osmobjid;
 		public:
 			void tag_add(const struct Address::Tag::Info& taginfo, const char *value);
 			void tag_add_name(const char *tag, const char *value);

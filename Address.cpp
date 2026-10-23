@@ -5,7 +5,7 @@
 namespace Address {
 
 void Object::tag_add(const struct Address::Tag::Info& taginfo, const char *value) {
-	tags.push_back(Address::Tag::Object(taginfo, value));
+	tags.emplace_back(Address::Tag::Object(taginfo, value));
 }
 
 void Object::tag_add_name(const char *tag, const char *value) {
@@ -54,7 +54,7 @@ const char *Object::source_string(void ) {
 }
 
 void Object::error_add(const std::string& error) {
-	errors.push_back(error);
+	errors.emplace_back(error);
 }
 
 void Object::parse_from_tags(const osmium::TagList& tags) {

@@ -119,6 +119,8 @@ public:
 		double nminX=minX;
 		double nminY=minY;
 
+		grid.reserve(stepX*stepY);
+
 		for(double X=minX+stepX;X<=maxX;X+=stepX) {
 			for(double Y=minY+stepY;Y<=maxY;Y+=stepY) {
 

@@ -407,7 +407,7 @@ public:
 
 			parseaddr(address, &point, way.tags());
 
-			AddressList->push_back(address);
+			AddressList->push_back(std::move(address));
 
                 } catch (const gdalcpp::gdal_error& e) {
                         std::cerr << "gdal_error while creating feature wayid " << way.id()<< std::endl;

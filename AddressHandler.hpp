@@ -185,9 +185,7 @@ public:
 	}
 
 	int popcount(unsigned x) noexcept {
-		unsigned num=0;
-		for (; x; ++num, x &= (x - 1));
-		return num;
+		return __builtin_popcount(x);
 	}
 
 	std::string mask_to_prefixlist(Address::Tag::PrefixType_t mask) {

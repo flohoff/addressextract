@@ -18,8 +18,6 @@ public:
 	}
 
 	bool valid(void ) {
-		if (postcode == "")
-			return false;
 		if (postcode.length() == 0)
 			return false;
 		return true;

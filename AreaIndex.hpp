@@ -120,7 +120,7 @@ public:
 		for(double X=minX+stepX;X<=maxX;X+=stepX) {
 			for(double Y=minY+stepY;Y<=maxY;Y+=stepY) {
 
-				auto ring=std::unique_ptr<OGRLinearRing>(new OGRLinearRing());
+				auto ring=std::make_unique<OGRLinearRing>();
 
 				ring->addPoint(nminX, nminY);
 				ring->addPoint(nminX, Y);
@@ -129,7 +129,7 @@ public:
 				ring->addPoint(nminX, nminY);
 				ring->assignSpatialReference(&oSRS);
 
-				auto geom=std::unique_ptr<OGRPolygon>(new OGRPolygon());
+				auto geom=std::make_unique<OGRPolygon>();
 				geom->addRingDirectly(ring.release());
 
 				grid.push_back(std::move(geom));

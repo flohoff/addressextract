@@ -14,7 +14,7 @@ buildstabletrixie:
     GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
   script:
     - apt-get update && apt-get -fuy install git
-    - git clone ${GIT_BASE}/mirror/libosmium && git -C libosmium checkout -b build $LIBOSMIUM_STABLE_VERSION
+    - git clone ${GIT_BASE}/mirror/osmcode/libosmium && git -C libosmium checkout -b build $LIBOSMIUM_STABLE_VERSION
     - git clone ${GIT_BASE}/mirror/nlohmann-json json && git -C json checkout -b build $NLOHMANN_STABLE_VERSION
     - git clone ${GIT_BASE}/mirror/protozero && git -C protozero checkout -b build $PROTOZERO_STABLE_VERSION
     - apt-get update

@@ -388,14 +388,14 @@ public:
 		if (!isaddress(way.tags()))
 			return;
 
-		OGRGeometry	*geom=nullptr;
+		std::unique_ptr<OGRGeometry>	geom;
 
 		Address::Object	address;
 		address.source=Address::SourceWay;
 		address.osmobjid=way.id();
 
 		try {
-			geom=m_factory.create_linestring(way).release();
+			std::unique_ptr<OGRGeometry> geom(m_factory.create_linestring(way).release());
 			const osmium::Box envelope = way.envelope();
 
 			address.bbox[0]=envelope.bottom_left().lon();
@@ -418,9 +418,6 @@ public:
                 } catch (const osmium::geometry_error& e) {
                         std::cerr << "geometry error wayid " << way.id() << std::endl;
                 }
-
-		if (geom)
-			free(geom);
 	}
 
 	void node(const osmium::Node& node) {

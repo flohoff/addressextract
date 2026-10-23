@@ -127,7 +127,7 @@ namespace Address {
 			void tag_add(const struct Address::Tag::Info& taginfo, const char *value);
 			void tag_add_name(const char *tag, const char *value);
 			Tag::Object* tag_get(const std::string& tag);
-			void error_add(const std::string error);
+			void error_add(const std::string& error);
 			bool has_tag_type(Address::Tag::TagType_t type);
 			int tag_num(void );
 			Tag::Object* tag_get_by_type(Address::Tag::TagType_t type);

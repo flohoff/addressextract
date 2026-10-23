@@ -53,7 +53,7 @@ const char *Object::source_string(void ) {
 	return Address::SourceStringMap.at(source);
 }
 
-void Object::error_add(const std::string error) {
+void Object::error_add(const std::string& error) {
 	errors.push_back(error);
 }
 

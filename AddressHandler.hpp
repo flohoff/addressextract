@@ -439,7 +439,7 @@ public:
 
 		parseaddr(address, &point, node.tags());
 
-		AddressList->push_back(address);
+		AddressList->push_back(std::move(address));
 	}
 
 	void area(const osmium::Area& area) {
@@ -453,7 +453,7 @@ public:
 
 		parseaddr(address, nullptr, area.tags());
 
-		AddressList->push_back(address);
+		AddressList->push_back(std::move(address));
 	}
 
 	std::vector<Address::Object> *addresslist(void ) {

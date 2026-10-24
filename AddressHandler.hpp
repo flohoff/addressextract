@@ -292,28 +292,19 @@ public:
 
 		checkerror_prefixes(address);
 
-		if (address.has_tag_type(Address::Tag::TYPE_COUNTRY)) {
-			const Address::Tag::Object *tag=address.tag_get_by_type(Address::Tag::TYPE_COUNTRY);
-
-			if (!std::regex_search(tag->value, country_regex)) {
-				address.error_add("Country format issues");
-			}
+		auto tagcountry=address.tag_get_by_type(Address::Tag::TYPE_COUNTRY);
+		if (tagcountry && !std::regex_search(tagcountry->value, country_regex)) {
+			address.error_add("Country format issues");
 		}
 
-		if (address.has_tag_type(Address::Tag::TYPE_STREET)) {
-			const Address::Tag::Object *tag=address.tag_get_by_type(Address::Tag::TYPE_STREET);
-
-			if (std::regex_search(tag->value, street_regex)) {
-				address.error_add("Street format issues");
-			}
+		auto tagstreet=address.tag_get_by_type(Address::Tag::TYPE_STREET);
+		if (tagstreet && std::regex_search(tagstreet->value, street_regex)) {
+			address.error_add("Street format issues");
 		}
 
-		if (address.has_tag_type(Address::Tag::TYPE_POSTCODE)) {
-			const Address::Tag::Object *tag=address.tag_get_by_type(Address::Tag::TYPE_POSTCODE);
-
-			if (!std::regex_search(tag->value, postcode_regex)) {
-				address.error_add("Postcode format issues");
-			}
+		auto tagpostcode=address.tag_get_by_type(Address::Tag::TYPE_POSTCODE);
+		if (tagpostcode && !std::regex_search(tagpostcode->value, postcode_regex)) {
+			address.error_add("Postcode format issues");
 		}
 
 		// FIXME - Untested

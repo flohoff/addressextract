@@ -7,6 +7,7 @@
 #include <string>
 #include <map>
 #include <list>
+#include <optional>
 
 namespace Address {
 	namespace Tag {
@@ -130,8 +131,7 @@ namespace Address {
 			void error_add(const std::string& error);
 			bool has_tag_type(Address::Tag::TagType_t type);
 			int tag_num(void );
-			Tag::Object* tag_get_by_type(Address::Tag::TagType_t type);
-			std::string *tagvalue_get_by_type(Address::Tag::TagType_t type);
+			std::optional<Tag::Object> tag_get_by_type(Address::Tag::TagType_t type);
 			const char *source_string(void ) const;
 			void parse_from_tags(const osmium::TagList& tags);
 	};

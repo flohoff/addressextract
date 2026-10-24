@@ -155,7 +155,7 @@ void process_file(po::variables_map& vm) {
 	 * so the "," lands at the end of every line but never after the
 	 * last one. */
 	std::string pendingline;
-	auto AddressWriter=[&outfile,&pendingline](Address::Object& ao) {
+	auto AddressWriter=[&outfile,&pendingline](const Address::Object& ao) {
 		std::ostringstream	line;
 
 		line << ao;

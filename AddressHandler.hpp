@@ -32,7 +32,7 @@ static bool postcode_compare(PostCode *a, PostCode *b) {
 	return(a->cache > b->cache);
 }
 
-using AddressWriteFn = std::function<void(Address::Object&)>;
+using AddressWriteFn = std::function<void(const Address::Object&)>;
 
 class AddressHandler : public osmium::handler::Handler {
 	AddressWriteFn			writer;

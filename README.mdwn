@@ -36,7 +36,7 @@ describing problems with this address - It could look like this:
 Usage
 =====
 
-	addressextract -i mylocal.pbf >addresses.json
+	addressextract -i mylocal.pbf -o addresses.json
 
 Filtering and extracting
 ========================
@@ -75,9 +75,10 @@ Using Debian/Buster to setup a solr:
 	sudo cp -rav searchasyoutype/solr36conf/* /etc/solr/
 	sudo service jetty9 restart
 
-	addressextract -i <mylittlepbf | jq .addresses >addresses.json
+	addressextract -i mylittlepbf -o addresses.json
+    jq .addresses <addresses.json >onlyaddresses.json
 
-	searchasyoutype/pushtosolr http://localhost:8080/solr addresses.json
+	searchasyoutype/pushtosolr http://localhost:8080/solr onlyaddresses.json
 
 Now you can query the solr for results:
 

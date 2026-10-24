@@ -162,11 +162,13 @@ std::vector<Address::Object> process_file(json& jmeta, po::variables_map& vm) {
 }
 
 void addresses_dump(json jmeta, const std::vector<Address::Object>& addresses) {
+
 	std::cout << "{" << std::endl
 		<< "\"meta\": " << jmeta << "," << std::endl
 		<< "\"addresses\": [" << std::endl;
 
-	for (auto& a : addresses) {
+	for (auto it=addresses.begin(); it!=addresses.end(); ++it) {
+		auto& a=*it;
 		json jaddr;
 
 		jaddr["id"]=a.osmobjid;
@@ -193,7 +195,7 @@ void addresses_dump(json jmeta, const std::vector<Address::Object>& addresses) {
 			jaddr["errors"]=errors;
 		}
 
-		std::cout << jaddr << "," << std::endl;
+		std::cout << jaddr << (std::next(it) != addresses.end() ? "," : "") << "\n";
 	}
 	std::cout << "]}" << std::endl;
 }

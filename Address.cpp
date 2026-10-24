@@ -10,7 +10,7 @@ void Object::tag_add(const struct Address::Tag::Info& taginfo, const char *value
 
 void Object::tag_add_name(const char *tag, const char *value) {
 	for(auto& ti : Tag::InfoList) {
-		if (tag != ti.tag)
+		if (std::string_view(tag) != ti.tag)
 			continue;
 		tag_add(ti, value);
 		break;
@@ -59,7 +59,7 @@ void Object::error_add(const std::string& error) {
 
 void Object::parse_from_tags(const osmium::TagList& tags) {
 	for(auto &addrtaginfo : Address::Tag::InfoList) {
-		const char *value=tags.get_value_by_key(addrtaginfo.tag.c_str(), nullptr);
+		const char *value=tags.get_value_by_key(addrtaginfo.tag, nullptr);
 		if (!value)
 			continue;
 		tag_add(addrtaginfo, value);

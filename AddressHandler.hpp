@@ -62,7 +62,7 @@ public:
 			return false;
 
 		for(auto &taginfo : Address::Tag::InfoList) {
-			if (tags.has_key(taginfo.tag.c_str()))
+			if (tags.has_key(taginfo.tag))
 				return true;
 		}
 		return false;
@@ -189,8 +189,10 @@ public:
 	std::string mask_to_prefixlist(Address::Tag::PrefixType_t mask) {
 		std::string	prefixes;
 		for(auto &pfx : Address::Tag::PrefixMap) {
-			if (mask & pfx.first)
-				prefixes+=pfx.second + " ";
+			if (mask & pfx.first) {
+				prefixes.append(pfx.second);
+				prefixes+=' ';
+			}
 		}
 
 		/* Remove trailing whitespace */
@@ -223,10 +225,10 @@ public:
 			if (popcount(el.second) == 1)
 				continue;
 
-			std::string error="Tag "
-				+ Address::Tag::TagTypeMap.at(el.first)
-				+ " in multiple prefixes: "
-				+ mask_to_prefixlist(el.second);
+			std::string error="Tag ";
+			error.append(Address::Tag::TagTypeMap.at(el.first));
+			error.append(" in multiple prefixes: ");
+			error.append(mask_to_prefixlist(el.second));
 
 			address.error_add(error);
 		}
@@ -240,14 +242,16 @@ public:
 			for(auto &etag : enclosed.tags) {
 				if (atag.info.tagtypeid == etag.info.tagtypeid) {
 					if (atag.value != etag.value) {
-						std::string error="Enclosing object tag mismatch "
-							+ atag.info.tag
-							+ " with value "
-							+ atag.value
-							+ " to tag "
-							+ etag.info.tag
-							+ " with value "
-							+ etag.value;
+
+						std::string error="Enclosing object tag mismatch ";
+						error.append(atag.info.tag);
+						error.append(" with value ");
+						error.append(atag.value);
+						error.append(" to tag ");
+						error.append(etag.info.tag);
+						error.append(" with value ");
+						error.append(etag.value);
+
 						address.error_add(error);
 					}
 				}

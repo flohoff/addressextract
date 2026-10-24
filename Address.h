@@ -20,7 +20,7 @@ namespace Address {
 			PFX_CONTACT=1<<3
 		};
 
-		const std::map<PrefixType_t,std::string> PrefixMap = {
+		inline const std::map<PrefixType_t,std::string_view> PrefixMap = {
 			{ PFX_GEOM, "geom" },
 			{ PFX_ADDR, "addr" },
 			{ PFX_OBJECT, "object" },
@@ -40,13 +40,13 @@ namespace Address {
 		};
 
 		struct Info {
-			std::string	tag;
-			std::string	tagshort;
-			PrefixType_t	tagpfxid;
-			TagType_t	tagtypeid;
+			const char		*tag;
+			const char		*tagshort;
+			PrefixType_t		tagpfxid;
+			TagType_t		tagtypeid;
 		};
 
-		const std::map<TagType_t, std::string> TagTypeMap = {
+		inline const std::map<TagType_t, std::string_view> TagTypeMap = {
 			{ TYPE_COUNTRY,		"country" },
 			{ TYPE_COUNTY,		"county" },
 			{ TYPE_CITY,		"city" },
@@ -58,7 +58,7 @@ namespace Address {
 			{ TYPE_HOUSENAME,	"housename" }
 		};
 
-		const std::vector<struct Info> InfoList= {
+		inline const std::vector<struct Info> InfoList= {
 			{ "addr:city",		"city",		PFX_ADDR,	TYPE_CITY },
 			{ "addr:suburb",	"suburb",	PFX_ADDR,	TYPE_SUBURB },
 			{ "addr:place",		"place",	PFX_ADDR,	TYPE_PLACE },
@@ -109,7 +109,7 @@ namespace Address {
 		SourceNode
 	};
 
-	const std::map<int, const char *> SourceStringMap={
+	inline const std::map<int, const char *> SourceStringMap={
 		{ SourceRelation, "relation" },
 		{ SourceWay, "way" },
 		{ SourceNode, "node" }

@@ -1,7 +1,9 @@
 
-#include <cstdlib>  // for std::exit
-#include <cstring>  // for std::strcmp
-#include <iostream> // for std::cout, std::cerr
+#include <cstdlib>    // for std::exit
+#include <cstring>    // for std::strcmp
+#include <iostream>   // for std::cout, std::cerr
+#include <sstream>    // for std::ostringstream
+#include <functional> // for std::bind std::function
 
 // For assembling multipolygons
 #include <osmium/area/assembler.hpp>
@@ -83,7 +85,8 @@ void boundaryindex_add_hierarchy(AreaIndex<Boundary>& index) {
 	}
 }
 
-std::vector<Address::Object> process_file(json& jmeta, po::variables_map& vm) {
+void process_file(po::variables_map& vm) {
+
 	osmium::io::File input_file{vm["infile"].as<std::string>()};
 
 	osmium::area::Assembler::config_type assembler_config;
@@ -118,6 +121,7 @@ std::vector<Address::Object> process_file(json& jmeta, po::variables_map& vm) {
 	osmium::io::Reader reader{input_file};
 	osmium::io::Header header{reader.header()};
 
+	json	jmeta;
 	std::string timestamp=header.get("timestamp");
 	if (!timestamp.empty()) {
 		std::cerr << "Timestamp " << header.get("timestamp") << std::endl;
@@ -141,15 +145,44 @@ std::vector<Address::Object> process_file(json& jmeta, po::variables_map& vm) {
 	if (!t_nocache)
 		boundaryindex_add_hierarchy(boundaryindex);
 
+	std::ofstream outfile(vm["outfile"].as<std::string>());
+
+	outfile << "{" << std::endl
+		<< "\"meta\": " << jmeta << "," << std::endl
+		<< "\"addresses\": [" << std::endl;
+
+	/* The finished record is held back until the next record arrives,
+	 * so the "," lands at the end of every line but never after the
+	 * last one. */
+	std::string pendingline;
+	auto AddressWriter=[&outfile,&pendingline](Address::Object& ao) {
+		std::ostringstream	line;
+
+		line << ao;
+
+		if (!pendingline.empty())
+			outfile << pendingline << ",\n";
+		pendingline=line.str();
+	};
+
 	std::cerr << "Looking for addresses" << std::endl;
-	AddressHandler	ahandler{boundaryindex, postcodeindex, buildingindex,
-		t_errors, t_missing, t_nocache, vm["postcoderegex"].as<std::string>()};
+	AddressHandler	ahandler{
+			AddressWriter,
+			boundaryindex,
+			postcodeindex,
+			buildingindex,
+			t_errors,
+			t_missing,
+			t_nocache,
+			vm["postcoderegex"].as<std::string>()};
 
 	osmium::io::Reader readerpass3{input_file};
 	osmium::apply(readerpass3,
 			location_handler,
 			ahandler);
 	readerpass3.close();
+	outfile << pendingline << std::endl;
+	outfile << "]}" << std::endl;
 
 	std::cerr << "Stats buildingindex: " << std::endl;
 	buildingindex.dump_stats(std::cerr);
@@ -158,46 +191,6 @@ std::vector<Address::Object> process_file(json& jmeta, po::variables_map& vm) {
 	std::cerr << "Stats boundaryindex: " << std::endl;
 	boundaryindex.dump_stats(std::cerr);
 
-	return std::move(ahandler.addresslist());
-}
-
-void addresses_dump(json jmeta, const std::vector<Address::Object>& addresses) {
-
-	std::cout << "{" << std::endl
-		<< "\"meta\": " << jmeta << "," << std::endl
-		<< "\"addresses\": [" << std::endl;
-
-	for (auto it=addresses.begin(); it!=addresses.end(); ++it) {
-		auto& a=*it;
-		json jaddr;
-
-		jaddr["id"]=a.osmobjid;
-		jaddr["source"]=a.source_string();
-
-		jaddr["lat"]=a.lat;
-		jaddr["lon"]=a.lon;
-
-		if (a.bbox[0]) {
-			json bbox;
-			for(int i=0;i<=3;i++)
-				bbox.push_back(a.bbox[i]);
-			jaddr["bbox"]=bbox;
-		}
-
-		for(auto& t : a.tags)
-			jaddr[t.info.tagshort]=t.value;
-
-		if (a.errors.size() > 0) {
-			json errors;
-			for(auto& errorstring : a.errors) {
-				errors.push_back(errorstring);
-			}
-			jaddr["errors"]=errors;
-		}
-
-		std::cout << jaddr << (std::next(it) != addresses.end() ? "," : "") << "\n";
-	}
-	std::cout << "]}" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -210,6 +203,7 @@ int main(int argc, char* argv[]) {
 		("nocache", po::bool_switch(&t_nocache), "Do not use boundary caching")
 		("postcoderegex", po::value<std::string>()->default_value("^[0-9]{5}$"), "Postcode validation regex")
 		("infile,i", po::value<std::string>()->required(), "Input file")
+		("outfile,o", po::value<std::string>()->required(), "Output file")
 	;
 	po::variables_map vm;
 	try {
@@ -226,7 +220,5 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	json	jmeta;
-	std::vector<Address::Object> addresses=process_file(jmeta, vm);
-	addresses_dump(jmeta, addresses);
+	process_file(vm);
 }

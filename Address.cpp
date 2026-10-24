@@ -1,6 +1,8 @@
 #include "Address.h"
 
 #include <iostream>
+
+#include <nlohmann/json.hpp>
 #include <optional>
 
 namespace Address {
@@ -65,6 +67,38 @@ void Object::parse_from_tags(const osmium::TagList& tags) {
 			continue;
 		tag_add(addrtaginfo, value);
 	}
+}
+
+std::ostream& operator<<(std::ostream& os, const Object& a) {
+	nlohmann::json jaddr;
+
+	jaddr["id"]=a.osmobjid;
+	jaddr["source"]=a.source_string();
+
+	jaddr["lat"]=a.lat;
+	jaddr["lon"]=a.lon;
+
+	if (a.bbox[0]) {
+		nlohmann::json bbox;
+		for(int i=0;i<=3;i++)
+			bbox.push_back(a.bbox[i]);
+		jaddr["bbox"]=bbox;
+	}
+
+	for(auto& t : a.tags)
+		jaddr[t.info.tagshort]=t.value;
+
+	if (a.errors.size() > 0) {
+		nlohmann::json errors;
+		for(auto& errorstring : a.errors) {
+			errors.push_back(errorstring);
+		}
+		jaddr["errors"]=errors;
+	}
+
+	os << jaddr;
+
+	return os;
 }
 
 }; // namespace Address

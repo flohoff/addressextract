@@ -3,6 +3,7 @@
 
 #include <osmium/tags/tags_filter.hpp>
 
+#include <iosfwd>
 #include <vector>
 #include <string>
 #include <map>
@@ -121,5 +122,9 @@ namespace Address {
 			const char *source_string(void ) const;
 			void parse_from_tags(const osmium::TagList& tags);
 	};
+
+	/* Json serializer - one line record per address */
+	std::ostream& operator<<(std::ostream& os, const Object& a);
+
 }; // namespace Address
 #endif

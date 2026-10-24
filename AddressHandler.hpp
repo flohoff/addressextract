@@ -8,6 +8,8 @@
 #include <regex>
 #include <string>
 #include <iostream>
+#include <functional>
+#include <utility>
 
 #include "AreaIndex.hpp"
 #include "Boundary.hpp"
@@ -30,12 +32,14 @@ static bool postcode_compare(PostCode *a, PostCode *b) {
 	return(a->cache > b->cache);
 }
 
+using AddressWriteFn = std::function<void(Address::Object&)>;
+
 class AddressHandler : public osmium::handler::Handler {
+	AddressWriteFn			writer;
 	osmium::geom::OGRFactory<>      m_factory{};
 	AreaIndex<Boundary>&		boundaryindex;
 	AreaIndex<PostCode>&		postcodeindex;
 	AreaIndex<Building>&		buildingindex;
-	std::vector<Address::Object>	AddressList;
 	bool				t_errors,t_missing,t_nocache;
 	std::regex			housenumber_regex,
 					street_regex,
@@ -44,9 +48,9 @@ class AddressHandler : public osmium::handler::Handler {
 	OGRPoint			point;
 	OGREnvelope			envelope;
 public:
-	AddressHandler(AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, AreaIndex<Building>& buidx,
+	AddressHandler(AddressWriteFn&& writefn, AreaIndex<Boundary>& bidx, AreaIndex<PostCode>& pidx, AreaIndex<Building>& buidx,
 			bool errors, bool missing, bool nocache, std::string postcoderegexstring) :
-		boundaryindex(bidx), postcodeindex(pidx), buildingindex(buidx),
+		writer(std::forward<AddressWriteFn>(writefn)), boundaryindex(bidx), postcodeindex(pidx), buildingindex(buidx),
 			t_errors(errors), t_missing(missing), t_nocache(nocache) {
 
 		country_regex="^[A-Z][A-Z]$";
@@ -342,7 +346,7 @@ public:
 
 			parseaddr(address, &point, way.tags());
 
-			AddressList.push_back(std::move(address));
+			writer(address);
 
                 } catch (const gdalcpp::gdal_error& e) {
                         std::cerr << "gdal_error while creating feature wayid " << way.id()<< std::endl;
@@ -376,7 +380,7 @@ public:
 
 		parseaddr(address, &point, node.tags());
 
-		AddressList.push_back(std::move(address));
+		writer(address);
 	}
 
 	void area(const osmium::Area& area) {
@@ -390,10 +394,6 @@ public:
 
 		parseaddr(address, nullptr, area.tags());
 
-		AddressList.push_back(std::move(address));
-	}
-
-	std::vector<Address::Object>& addresslist(void ) {
-		return AddressList;
+		writer(address);
 	}
 };

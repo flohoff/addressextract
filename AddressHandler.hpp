@@ -40,7 +40,6 @@ class AddressHandler : public osmium::handler::Handler {
 	std::regex			housenumber_regex,
 					street_regex,
 					postcode_regex,
-					housename_regex,
 					country_regex;
 	OGRPoint			point;
 	OGREnvelope			envelope;
@@ -52,7 +51,6 @@ public:
 
 		country_regex="^[A-Z][A-Z]$";
 		housenumber_regex="^ |,|;| $|[0-9] [a-zA-Z]";
-		housename_regex="^ *[0-9]* *$|GmbH|e\\. *V\\.|Sparkasse|[sS]tr\\.|[Ss]traße|http[s]*://";
 		street_regex="^ | $|[,:;_#+\"/]|Str\\.$|str\\.$|\\t|\\.$";
 		postcode_regex=postcoderegexstring;
 	}

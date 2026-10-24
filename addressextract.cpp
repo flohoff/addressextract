@@ -83,7 +83,7 @@ void boundaryindex_add_hierarchy(AreaIndex<Boundary>& index) {
 	}
 }
 
-std::vector<Address::Object> process_file(json& jfile, po::variables_map& vm) {
+std::vector<Address::Object> process_file(json& jmeta, po::variables_map& vm) {
 	osmium::io::File input_file{vm["infile"].as<std::string>()};
 
 	osmium::area::Assembler::config_type assembler_config;
@@ -121,7 +121,7 @@ std::vector<Address::Object> process_file(json& jfile, po::variables_map& vm) {
 	std::string timestamp=header.get("timestamp");
 	if (!timestamp.empty()) {
 		std::cerr << "Timestamp " << header.get("timestamp") << std::endl;
-		jfile["timestamp"]=timestamp;
+		jmeta["timestamp"]=timestamp;
 	}
 
 	osmium::apply(reader,
@@ -161,8 +161,10 @@ std::vector<Address::Object> process_file(json& jfile, po::variables_map& vm) {
 	return std::move(ahandler.addresslist());
 }
 
-void addresses_dump(json& jfile, const std::vector<Address::Object>& addresses) {
-	json	jaddrs;
+void addresses_dump(json jmeta, const std::vector<Address::Object>& addresses) {
+	std::cout << "{" << std::endl
+		<< "\"meta\": " << jmeta << "," << std::endl
+		<< "\"addresses\": [" << std::endl;
 
 	for (auto& a : addresses) {
 		json jaddr;
@@ -191,11 +193,9 @@ void addresses_dump(json& jfile, const std::vector<Address::Object>& addresses) 
 			jaddr["errors"]=errors;
 		}
 
-		jaddrs.push_back(jaddr);
+		std::cout << jaddr << "," << std::endl;
 	}
-
-	jfile["addresses"]=jaddrs;
-	std::cout << jfile << std::endl;;
+	std::cout << "]}" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -224,7 +224,7 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	json	file;
-	std::vector<Address::Object> addresses=process_file(file, vm);
-	addresses_dump(file, addresses);
+	json	jmeta;
+	std::vector<Address::Object> addresses=process_file(jmeta, vm);
+	addresses_dump(jmeta, addresses);
 }

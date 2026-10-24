@@ -16,16 +16,12 @@ namespace Address {
 
 		enum PREFIX {
 			PFX_GEOM=1<<0,
-			PFX_ADDR=1<<1,
-			PFX_OBJECT=1<<2,
-			PFX_CONTACT=1<<3
+			PFX_ADDR=1<<1
 		};
 
 		inline const std::map<PrefixType_t,std::string_view> PrefixMap = {
 			{ PFX_GEOM, "geom" },
-			{ PFX_ADDR, "addr" },
-			{ PFX_OBJECT, "object" },
-			{ PFX_CONTACT, "contact" }
+			{ PFX_ADDR, "addr" }
 		};
 
 		enum TYPE {
@@ -69,16 +65,6 @@ namespace Address {
 			{ "addr:housename",	"housename",	PFX_ADDR,	TYPE_HOUSENAME },
 			{ "addr:country",	"country",	PFX_ADDR,	TYPE_COUNTRY },
 			{ "addr:county",	"county",	PFX_ADDR,	TYPE_COUNTY },
-
-			{ "object:city",	"city",		PFX_OBJECT,	TYPE_CITY },
-			{ "object:suburb",	"suburb",	PFX_OBJECT,	TYPE_SUBURB },
-			{ "object:place",	"place",	PFX_OBJECT,	TYPE_PLACE },
-			{ "object:postcode",	"postcode",	PFX_OBJECT,	TYPE_POSTCODE },
-			{ "object:street",	"street",	PFX_OBJECT,	TYPE_STREET },
-			{ "object:housenumber",	"housenumber",	PFX_OBJECT,	TYPE_HOUSENUMBER },
-			{ "object:housename",	"housename",	PFX_OBJECT,	TYPE_HOUSENAME },
-			{ "object:country",	"country",	PFX_OBJECT,	TYPE_COUNTRY },
-			{ "object:county",	"county",	PFX_OBJECT,	TYPE_COUNTRY },
 
 			/* Internal types */
 			{ "geom:city",		"geomcity",	PFX_GEOM,	TYPE_CITY },
@@ -131,7 +117,7 @@ namespace Address {
 			void error_add(const std::string& error);
 			bool has_tag_type(Address::Tag::TagType_t type);
 			int tag_num(void );
-			std::optional<Tag::Object> tag_get_by_type(Address::Tag::TagType_t type);
+			std::optional<Tag::Object> tag_get_by_type(Address::Tag::TagType_t type, Address::Tag::PrefixType_t pfx);
 			const char *source_string(void ) const;
 			void parse_from_tags(const osmium::TagList& tags);
 	};

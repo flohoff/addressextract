@@ -18,9 +18,9 @@ void Object::tag_add_name(const char *tag, const char *value) {
 	}
 }
 
-std::optional<Tag::Object> Object::tag_get_by_type(Address::Tag::TagType_t type) {
+std::optional<Tag::Object> Object::tag_get_by_type(Address::Tag::TagType_t type, Address::Tag::PrefixType_t pfx) {
 	for(auto &t : tags) {
-		if (t.type() == type) {
+		if (t.type() == type && t.pfx() == pfx) {
 			return t;
 		}
 	}

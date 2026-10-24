@@ -180,58 +180,6 @@ public:
 		}
 	}
 
-	int popcount(unsigned x) noexcept {
-		return __builtin_popcount(x);
-	}
-
-	std::string mask_to_prefixlist(Address::Tag::PrefixType_t mask) {
-		std::string	prefixes;
-		for(auto &pfx : Address::Tag::PrefixMap) {
-			if (mask & pfx.first) {
-				prefixes.append(pfx.second);
-				prefixes+=' ';
-			}
-		}
-
-		/* Remove trailing whitespace */
-		if (prefixes.length())
-			prefixes.pop_back();
-
-		return prefixes;
-	}
-
-	void checkerror_prefixes(Address::Object& address) {
-		/* Collect bitmask */
-		std::map<Address::Tag::TagType_t,Address::Tag::PrefixType_t>	smap;
-		Address::Tag::PrefixType_t	mask=0;
-
-		for(auto &tag : address.tags) {
-			/* Dont collect internals */
-			if (tag.info.tagpfxid == Address::Tag::PFX_GEOM)
-				continue;
-
-			smap[tag.type()]|=tag.info.tagpfxid;
-			mask|=tag.info.tagpfxid;
-		}
-
-		if (popcount(mask) > 1) {
-			std::string error="Tags from multiple prefixes: " + mask_to_prefixlist(mask);
-			address.error_add(error);
-		}
-
-		for(auto const& el : smap) {
-			if (popcount(el.second) == 1)
-				continue;
-
-			std::string error="Tag ";
-			error.append(Address::Tag::TagTypeMap.at(el.first));
-			error.append(" in multiple prefixes: ");
-			error.append(mask_to_prefixlist(el.second));
-
-			address.error_add(error);
-		}
-	}
-
 	void compare_enclosed_in(Address::Object& address, Address::Object& enclosed) {
 		for(auto &atag : address.tags) {
 			// We dont compare generated tags to enclosing
@@ -288,19 +236,17 @@ public:
 		if (!address.has_tag_type(Address::Tag::TYPE_STREET) && !address.has_tag_type(Address::Tag::TYPE_PLACE))
 			address.error_add("No addr:street or addr:place");
 
-		checkerror_prefixes(address);
-
-		auto tagcountry=address.tag_get_by_type(Address::Tag::TYPE_COUNTRY);
+		auto tagcountry=address.tag_get_by_type(Address::Tag::TYPE_COUNTRY, Address::Tag::PFX_ADDR);
 		if (tagcountry && !std::regex_search(tagcountry->value, country_regex)) {
 			address.error_add("Country format issues");
 		}
 
-		auto tagstreet=address.tag_get_by_type(Address::Tag::TYPE_STREET);
+		auto tagstreet=address.tag_get_by_type(Address::Tag::TYPE_STREET, Address::Tag::PFX_ADDR);
 		if (tagstreet && std::regex_search(tagstreet->value, street_regex)) {
 			address.error_add("Street format issues");
 		}
 
-		auto tagpostcode=address.tag_get_by_type(Address::Tag::TYPE_POSTCODE);
+		auto tagpostcode=address.tag_get_by_type(Address::Tag::TYPE_POSTCODE, Address::Tag::PFX_ADDR);
 		if (tagpostcode && !std::regex_search(tagpostcode->value, postcode_regex)) {
 			address.error_add("Postcode format issues");
 		}

@@ -141,7 +141,8 @@ public:
 			bool hit=extend_city_boundary_check(address, b, geom);
 
 			if (!t_nocache && hit) {
-				extend_city_boundary_up(address, b);
+				/* Cachegrid cells hold their real boundary in parent; */
+				extend_city_boundary_up(address, b->cache ? b->parent : b);
 				break;
 			}
 		}

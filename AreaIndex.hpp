@@ -150,7 +150,10 @@ public:
 
 		auto grid=grid_generate(env.MinX, env.MinY, env.MaxX, env.MaxY);
 		for(auto& gentry : grid) {
-			auto cachea=std::make_unique<AreaType>(std::move(gentry), osmarea);
+			/* Grid cells are never geometric tests themselves; they only
+			 * carry cache flags that are evaluated against the parent
+			 * area's prepared geometry, so skip creating one per cell. */
+			auto cachea=std::make_unique<AreaType>(std::move(gentry), osmarea, false);
 
 			cachea->cache=true;
 			cachea->cachewithin=area->contains(cachea->geometry.get());

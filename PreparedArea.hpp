@@ -9,9 +9,13 @@ class PreparedArea : public AbstractArea {
 	public:
 	OGRPreparedGeometryUniquePtr	prepgeometry;
 
-	PreparedArea(std::unique_ptr<OGRGeometry> geom)
-		: AbstractArea(std::move(geom)),
-		prepgeometry(OGRCreatePreparedGeometry(static_cast<OGRGeometryH>(geometry.get()))) {
+	PreparedArea(std::unique_ptr<OGRGeometry> geom, bool prepared=true)
+		: AbstractArea(std::move(geom)) {
+
+		// We dont want grid cache cells to need a prepared geometry
+		if (prepared)
+			prepgeometry=OGRPreparedGeometryUniquePtr(
+					OGRCreatePreparedGeometry(static_cast<OGRGeometryH>(geometry.get())));
 	}
 
 	bool intersects(AbstractArea *oa) override {

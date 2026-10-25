@@ -24,8 +24,8 @@ public:
 	Boundary*	up=nullptr;
 	Boundary*	parent=nullptr;
 
-	Boundary(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
-		: PreparedArea(std::move(geom)) {
+	Boundary(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area, bool prepared=true)
+		: PreparedArea(std::move(geom), prepared) {
 
 		const osmium::TagList& taglist=area.tags();
 

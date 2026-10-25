@@ -16,8 +16,10 @@ public:
 	Address::Object		address;
 	Building		*parent;
 
-	Building(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
+	Building(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area, bool prepare=false)
 		: AbstractArea(std::move(geom)) {
+
+		(void)prepare;
 
 		const osmium::TagList& tags=area.tags();
 		id=osmium::area_id_to_object_id(area.id());

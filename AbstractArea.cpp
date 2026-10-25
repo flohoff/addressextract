@@ -22,7 +22,15 @@ bool AbstractArea::overlaps(AbstractArea *oa) {
 }
 
 bool AbstractArea::intersects(AbstractArea *oa) {
-	return geometry->Overlaps(oa->geometry.get());
+	return intersects(oa->geometry.get());
+}
+
+bool AbstractArea::intersects(OGRGeometry *other) {
+	return geometry->Intersects(other);
+}
+
+bool AbstractArea::contains(OGRGeometry *other) {
+	return geometry->Contains(other);
 }
 
 void AbstractArea::dump(void ) {

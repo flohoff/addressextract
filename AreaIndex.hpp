@@ -153,8 +153,8 @@ public:
 			auto cachea=std::make_unique<AreaType>(std::move(gentry), osmarea);
 
 			cachea->cache=true;
-			cachea->cachewithin=cachea->geometry->Within(area->geometry.get());
-			cachea->cacheintersects=cachea->geometry->Intersects(area->geometry.get());
+			cachea->cachewithin=area->contains(cachea->geometry.get());
+			cachea->cacheintersects=area->intersects(cachea->geometry.get());
 			cachea->parent=area;
 
 			/* Only insert positive entries */

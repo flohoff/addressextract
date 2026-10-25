@@ -97,7 +97,7 @@ public:
 
 	bool extend_city_boundary_check_intersect(Address::Object& address, Boundary *b, OGRGeometry *geom) {
 		boundaryindex.compared++;
-		if (geom->Intersects(b->geometry.get())) {
+		if (b->intersects(geom)) {
 			extend_city_boundary(address, b);
 			return true;
 		}
@@ -174,10 +174,8 @@ public:
 				}
 			}
 
-			postcodeindex.compared+=2;
-			if (geom->Within(i->geometry.get())
-				|| geom->Overlaps(i->geometry.get())) {
-
+			postcodeindex.compared++;
+			if (i->contains(geom)) {
 				address.tag_add_name("geom:postcode", i->postcode.c_str());
 				break;
 			}
@@ -221,7 +219,7 @@ public:
 		for(auto &i : list) {
 			buildingindex.returned++;
 			buildingindex.compared++;
-			if (!geom->Within(i->geometry.get()))
+			if (!i->contains(geom))
 				continue;
 
 			compare_enclosed_in(address, i->address);

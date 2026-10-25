@@ -67,7 +67,7 @@ void boundary_add_parent(AreaIndex<Boundary>& index, Boundary *b) {
 			continue;
 		if (b->admin_level <= overlapb->admin_level)
 			continue;
-		if (b->geometry->Within(overlapb->geometry.get())) {
+		if (overlapb->contains(b->geometry.get())) {
 			std::cerr << "Setting parent admin boundary on " << b->name
 				<< " alvl " << b->admin_level
 				<< " to " << overlapb->name

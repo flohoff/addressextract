@@ -2,7 +2,7 @@
 #define BOUNDARY_HPP
 
 #include <osmium/osm/area.hpp>
-#include "AbstractArea.hpp"
+#include "PreparedArea.hpp"
 
 enum {
 	BTYPE_UNKNOWN,
@@ -10,7 +10,7 @@ enum {
 	BTYPE_COUNTY
 };
 
-class Boundary : public AbstractArea {
+class Boundary : public PreparedArea {
 public:
 	osmium::unsigned_object_id_type	id;
 	int		admin_level=99;
@@ -25,7 +25,7 @@ public:
 	Boundary*	parent=nullptr;
 
 	Boundary(std::unique_ptr<OGRGeometry> geom, const osmium::Area &area)
-		: AbstractArea(std::move(geom)) {
+		: PreparedArea(std::move(geom)) {
 
 		const osmium::TagList& taglist=area.tags();
 

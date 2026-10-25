@@ -176,9 +176,25 @@ void process_file(po::variables_map& vm) {
 			t_nocache,
 			vm["postcoderegex"].as<std::string>()};
 
+	/* On the follow-up read pass the location index is already fully
+	 * populated, so only the way() lookups are needed. Re-feeding every
+	 * node into the FlexMem index (re-building and re-sorting it) is
+	 * pure overhead, so the nodes are routed to a no-op handler here. */
+	class WayOnlyLocationHandler : public osmium::handler::Handler {
+		location_handler_type&	m_lh;
+	public:
+		explicit WayOnlyLocationHandler(location_handler_type& lh) : m_lh(lh) { }
+		void way(osmium::Way& way) {
+			m_lh.way(way);
+		}
+		void node(const osmium::Node& node) { (void)node; }
+	} wayonlylocationhandler{location_handler};
+
+
+
 	osmium::io::Reader readerpass3{input_file};
 	osmium::apply(readerpass3,
-			location_handler,
+			wayonlylocationhandler,
 			ahandler);
 	readerpass3.close();
 	outfile << pendingline << std::endl;

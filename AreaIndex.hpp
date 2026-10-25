@@ -103,70 +103,73 @@ public:
 		rtree->intersectsWithQuery(region, qvisitor);
 	}
 
-#define GRID_NUM_CELL_XY	16
-#define GRID_NUM_CELLS		(GRID_NUM_CELL_XY*GRID_NUM_CELL_XY)
+/* Recursive (quadtree) segmentation of the area envelope. */
+#define GRID_MAX_LEVEL	4
+#define CACHE_NEGATIVE_CELLS 0
 
-	std::vector<std::unique_ptr<OGRGeometry>> grid_generate(double minX, double minY, double maxX, double maxY) {
-		std::vector<std::unique_ptr<OGRGeometry>>	grid;
+	std::unique_ptr<OGRGeometry> grid_cell(double minX, double minY, double maxX, double maxY) {
+		auto ring=std::make_unique<OGRLinearRing>();
 
-		double	stepX=(maxX-minX)/GRID_NUM_CELL_XY;
-		double	stepY=(maxY-minY)/GRID_NUM_CELL_XY;
+		ring->addPoint(minX, minY);
+		ring->addPoint(minX, maxY);
+		ring->addPoint(maxX, maxY);
+		ring->addPoint(maxX, minY);
+		ring->addPoint(minX, minY);
+		ring->assignSpatialReference(&oSRS);
 
-		double nminX=minX;
-		double nminY=minY;
+		auto geom=std::make_unique<OGRPolygon>();
+		geom->addRingDirectly(ring.release());
 
-		grid.reserve(GRID_NUM_CELLS);
+		return geom;
+	}
 
-		for(double X=minX+stepX;X<=maxX;X+=stepX) {
-			for(double Y=minY+stepY;Y<=maxY;Y+=stepY) {
+	void cache_insert_cell(AreaType *area, const osmium::Area& osmarea,
+			std::unique_ptr<OGRGeometry> cell, bool within) {
 
-				auto ring=std::make_unique<OGRLinearRing>();
+		auto cachea=std::make_unique<AreaType>(std::move(cell), osmarea, false);
 
-				ring->addPoint(nminX, nminY);
-				ring->addPoint(nminX, Y);
-				ring->addPoint(X, Y);
-				ring->addPoint(X, nminY);
-				ring->addPoint(nminX, nminY);
-				ring->assignSpatialReference(&oSRS);
+		cachea->cache=true;
+		cachea->cachewithin=within;
+		cachea->cacheintersects=within;
+		cachea->parent=area;
 
-				auto geom=std::make_unique<OGRPolygon>();
-				geom->addRingDirectly(ring.release());
+		cacheentriespos++;
+		rtree->insertData(0, nullptr, region(cachea.get()), (uint64_t) cachea.get());
+		cachevector.push_back(std::move(cachea));
+	}
 
-				grid.push_back(std::move(geom));
+	/* Recurse down the quadtree */
+	void cache_subdivide(AreaType *area, const osmium::Area& osmarea,
+			double minX, double minY, double maxX, double maxY, int level) {
+		auto cell=grid_cell(minX, minY, maxX, maxY);
 
-				nminY=Y;
-			}
-
-			nminX=X;
-			nminY=minY;
+		/* Cells fully outside the geometry */
+		if (level > 0 && !area->intersects(cell.get())) {
+			return;
 		}
 
-		return grid;
+		if (area->contains(cell.get())) {
+			cache_insert_cell(area, osmarea, std::move(cell), true);
+			return;
+		}
+
+		if (level >= GRID_MAX_LEVEL)
+			return;
+
+		double	midX=(minX+maxX)/2;
+		double	midY=(minY+maxY)/2;
+
+		cache_subdivide(area, osmarea, minX, minY, midX, midY, level+1);
+		cache_subdivide(area, osmarea, midX, minY, maxX, midY, level+1);
+		cache_subdivide(area, osmarea, minX, midY, midX, maxY, level+1);
+		cache_subdivide(area, osmarea, midX, midY, maxX, maxY, level+1);
 	}
 
 	void insert_cache_grid(AreaType *area, const osmium::Area& osmarea) {
 		OGREnvelope	env;
 		area->envelope(env);
 
-		auto grid=grid_generate(env.MinX, env.MinY, env.MaxX, env.MaxY);
-		for(auto& gentry : grid) {
-			/* Grid cells are never geometric tests themselves; they only
-			 * carry cache flags that are evaluated against the parent
-			 * area's prepared geometry, so skip creating one per cell. */
-			auto cachea=std::make_unique<AreaType>(std::move(gentry), osmarea, false);
-
-			cachea->cache=true;
-			cachea->cachewithin=area->contains(cachea->geometry.get());
-			cachea->cacheintersects=area->intersects(cachea->geometry.get());
-			cachea->parent=area;
-
-			/* Only insert positive entries */
-			if (cachea->cachewithin) {
-				cacheentriespos++;
-				rtree->insertData(0, nullptr, region(cachea.get()), (uint64_t) cachea.get());
-				cachevector.push_back(std::move(cachea));
-			}
-		}
+		cache_subdivide(area, osmarea, env.MinX, env.MinY, env.MaxX, env.MaxY, 0);
 	}
 
 	void insert(AreaType *area, const osmium::Area& osmarea) {

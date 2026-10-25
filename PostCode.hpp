@@ -3,7 +3,6 @@
 
 #include <osmium/osm/area.hpp>
 #include "PreparedArea.hpp"
-#include <iostream>
 
 class PostCode : public PreparedArea {
 public:

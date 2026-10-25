@@ -13,7 +13,6 @@ class AbstractArea {
 	virtual ~AbstractArea() = default;
 	AbstractArea(std::unique_ptr<OGRGeometry> geom);
 	void envelope(OGREnvelope& env);
-	virtual bool overlaps(AbstractArea *oa);
 	virtual bool intersects(AbstractArea *oa);
 	/* Spatial predicates of this area's geometry against another geometry.
 	 * Overridden by PreparedArea to use the prepared geometry of this side,

@@ -15,12 +15,6 @@ void AbstractArea::envelope(OGREnvelope& env) {
 	geometry->getEnvelope(&env);
 }
 
-bool AbstractArea::overlaps(AbstractArea *oa) {
-	return geometry->Overlaps(oa->geometry.get())
-		|| geometry->Contains(oa->geometry.get())
-		|| geometry->Within(oa->geometry.get());
-}
-
 bool AbstractArea::intersects(AbstractArea *oa) {
 	return intersects(oa->geometry.get());
 }

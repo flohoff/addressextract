@@ -14,15 +14,6 @@ class PreparedArea : public AbstractArea {
 		prepgeometry(OGRCreatePreparedGeometry(static_cast<OGRGeometryH>(geometry.get()))) {
 	}
 
-	// OGR only exposes OGRPreparedGeometryIntersects() and
-	// OGRPreparedGeometryContains() for prepared geometries. Intersects()
-	// subsumes the strict Overlaps()/Contains()/Within() combination used by
-	// AbstractArea::overlaps() (it additionally reports boundary-touching
-	// geometries, which the base class ignores).
-	bool overlaps(AbstractArea *oa) override {
-		return intersects(oa);
-	}
-
 	bool intersects(AbstractArea *oa) override {
 		return intersects(oa->geometry.get());
 	}

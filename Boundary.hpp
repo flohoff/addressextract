@@ -29,7 +29,7 @@ public:
 
 		const osmium::TagList& taglist=area.tags();
 
-		id=area.id();
+		id=area.orig_id();
 
 		name=taglist.get_value_by_key("official_name", "");
 		if (name == "")
@@ -51,23 +51,29 @@ public:
 				boundarytype=BTYPE_CITY;
 		}
 
-#if 0
-		std::cerr << "Boundary constructor called for "
-			<< name
-			<< std::endl << "\t"
-			<< " id " << osmium::area_id_to_object_id(id)
-			<< std::endl << "\t"
-			<< " name " << name
-			<< std::endl << "\t"
-			<< " admin_level " << admin_level
-			<< " de:place " << deplace
-			<< " boundarytype " << boundarytype
-			<< std::endl;
-#endif
+		if (!valid()) {
+			std::cerr << "Boundary constructor called for "
+				<< (area.from_way() ? "way" : "relation")
+				<< " " << area.orig_id()
+				<< std::endl << "\t"
+				<< " name " << name
+				<< std::endl << "\t"
+				<< " admin_level " << admin_level
+				<< " de:place " << deplace
+				<< " boundarytype " << boundarytype
+				<< std::endl;
+		}
 	}
 
 	bool is_county(void ) {
 		return (boundarytype == BTYPE_COUNTY);
+	}
+
+	/* Only specific admin levels and we need to have a name */
+	bool valid(void ) override {
+		return admin_level < 11
+			&& admin_level > 2
+			&& name.length() > 0;
 	}
 };
 

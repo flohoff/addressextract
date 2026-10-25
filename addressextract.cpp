@@ -61,9 +61,10 @@ void boundary_add_parent(AreaIndex<Boundary>& index, Boundary *b) {
 	std::sort(list.begin(), list.end(), compare_admin_level);
 
 	for(auto overlapb : list) {
-		if (b->id == overlapb->id)
+		/* We dont want cache grid celss in admin hierarchy */
+		if (overlapb->cache)
 			continue;
-		if (b->cache)
+		if (b->id == overlapb->id)
 			continue;
 		if (b->admin_level <= overlapb->admin_level)
 			continue;

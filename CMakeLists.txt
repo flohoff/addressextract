@@ -24,7 +24,8 @@ find_package(Osmium REQUIRED COMPONENTS io gdal)
 if(NOT OSMIUM_FOUND)
 	message(WARNING "Libosmium not found!\n")
 endif()
-find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options)
+
+find_package(Boost CONFIG 1.70.0 REQUIRED COMPONENTS program_options)
 include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(PkgConfig)

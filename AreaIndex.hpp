@@ -1,46 +1,27 @@
 #ifndef AREAINDEX_HPP
 #define AREAINDEX_HPP
 
-#include <SpatialIndex.h>
 #include <osmium/handler.hpp>
 #include <osmium/geom/ogr.hpp>
 #include <iostream>
 
-#define DEBUG	0
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/index/rtree.hpp>
 
-namespace si = SpatialIndex;
+namespace bg = boost::geometry;
+namespace bgi = boost::geometry::index;
 
-template <typename AT>
-class query_visitor : public si::IVisitor {
-	std::vector<AT*>	*list;
-
-	public:
-
-	query_visitor(std::vector<AT*> *l) : list(l){}
-
-	void visitNode(si::INode const& n) {
-		(void)n;
-	}
-
-	void visitData(si::IData const& d) {
-		uint64_t	id=d.getIdentifier();
-		list->push_back((AT *)id);
-	}
-
-	void visitData(std::vector<si::IData const*>& v) {
-		assert(!v.empty()); (void)v;
-	}
-};
+typedef bg::model::point<double, 2, bg::cs::cartesian>	index_point_t;
+typedef bg::model::box<index_point_t>			index_box_t;
+typedef std::pair<index_box_t, void *>			index_value_t;
 
 template <typename AreaType>
 class AreaIndex : public osmium::handler::Handler {
 	bool		cachegrid=false;
-	std::unique_ptr<si::IStorageManager>	sm;
-	std::unique_ptr<si::ISpatialIndex>	rtree;
+	bgi::rtree<index_value_t, bgi::quadratic<16, 4>>	rtree;
 
-	si::id_type index_id;
-
-	typedef std::array<double, 2> coord_array_t;
 	int64_t		id=0;
 
 	osmium::geom::OGRFactory<>	m_factory;
@@ -59,48 +40,46 @@ public:
 	int	cacheentriespos=0;
 
 private:
-	si::Region region(AreaType *area) {
+	/* Envelope of an area as an rtree box */
+	index_box_t box(AreaType *area) {
 		OGREnvelope	env;
 		area->envelope(env);
 
-		coord_array_t const p1 = { env.MinX, env.MinY };
-		coord_array_t const p2 = { env.MaxX, env.MaxY };
-
-		si::Region region(
-			si::Point(p1.data(), p1.size()),
-			si::Point(p2.data(), p2.size()));
-
-		return region;
+		return index_box_t(
+			index_point_t(env.MinX, env.MinY),
+			index_point_t(env.MaxX, env.MaxY));
 	}
 
 public:
-	AreaIndex(bool cachegrid, int icapacity, int lcapacity, int dim, double fill) :
-		cachegrid(cachegrid),
-		sm(si::StorageManager::createNewMemoryStorageManager()),
-		rtree(si::RTree::createNewRTree(*sm, fill, icapacity, lcapacity, dim, si::RTree::RV_LINEAR, index_id)) {
+	AreaIndex(bool cachegrid) :
+		cachegrid(cachegrid) {
 
 		oSRS.importFromEPSG(4326);
 	}
 
 	void findoverlapping(AreaType *area, std::vector<AreaType*> *list) {
-		query_visitor<AreaType> qvisitor{list};
-		rtree->intersectsWithQuery(region(area), qvisitor);
+		std::vector<index_value_t> results;
+		rtree.query(bgi::intersects(box(area)), std::back_inserter(results));
+
+		list->reserve(list->size() + results.size());
+		for(auto &v : results)
+			list->push_back((AreaType *) v.second);
 	}
 
 	void findoverlapping_geom(OGRGeometry *geom, std::vector<AreaType*> *list) {
-		query_visitor<AreaType> qvisitor{list};
-
 		OGREnvelope	env;
 		geom->getEnvelope(&env);
 
-		coord_array_t const p1 = { env.MinX, env.MinY };
-		coord_array_t const p2 = { env.MaxX, env.MaxY };
+		index_box_t qbox(
+			index_point_t(env.MinX, env.MinY),
+			index_point_t(env.MaxX, env.MaxY));
 
-		si::Region region(
-			si::Point(p1.data(), p1.size()),
-			si::Point(p2.data(), p2.size()));
+		std::vector<index_value_t> results;
+		rtree.query(bgi::intersects(qbox), std::back_inserter(results));
 
-		rtree->intersectsWithQuery(region, qvisitor);
+		list->reserve(list->size() + results.size());
+		for(auto &v : results)
+			list->push_back((AreaType *) v.second);
 	}
 
 /* Recursive (quadtree) segmentation of the area envelope. */
@@ -134,7 +113,7 @@ public:
 		cachea->parent=area;
 
 		cacheentriespos++;
-		rtree->insertData(0, nullptr, region(cachea.get()), (uint64_t) cachea.get());
+		rtree.insert(index_value_t(box(cachea.get()), cachea.get()));
 		cachevector.push_back(std::move(cachea));
 	}
 
@@ -173,10 +152,7 @@ public:
 	}
 
 	void insert(AreaType *area, const osmium::Area& osmarea) {
-		if (DEBUG)
-			std::cout << "Insert: " << area->id << std::endl;
-
-		rtree->insertData(0, nullptr, region(area), (uint64_t) area);
+		rtree.insert(index_value_t(box(area), area));
 		inserts++;
 
 		if (cachegrid)

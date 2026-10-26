@@ -1,6 +1,7 @@
 
 #include <cstdlib>    // for std::exit
 #include <cstring>    // for std::strcmp
+#include <fstream>    // for std::ofstream
 #include <iostream>   // for std::cout, std::cerr
 #include <sstream>    // for std::ostringstream
 #include <functional> // for std::bind std::function
@@ -92,19 +93,19 @@ void process_file(po::variables_map& vm) {
 
 	osmium::area::Assembler::config_type assembler_config;
 
-	AreaIndex<Building>	buildingindex(false, 100,30,2,0.5);
+	AreaIndex<Building>	buildingindex(false);
 	osmium::TagsFilter	buildingfilter{false};
 	buildingfilter.add_rule(true, osmium::TagMatcher{"building"});
 	osmium::area::MultipolygonManager<osmium::area::Assembler>
 		buildingmp_manager{assembler_config, buildingfilter};
 
-	AreaIndex<Boundary>	boundaryindex(!t_nocache, 100,30,2,0.5);
+	AreaIndex<Boundary>	boundaryindex(!t_nocache);
 	osmium::TagsFilter	boundaryfilter{false};
 	boundaryfilter.add_rule(true, "boundary", "administrative");
 	osmium::area::MultipolygonManager<osmium::area::Assembler>
 		boundarymp_manager{assembler_config, boundaryfilter};
 
-	AreaIndex<PostCode>	postcodeindex(!t_nocache, 100,30,2,0.5);
+	AreaIndex<PostCode>	postcodeindex(!t_nocache);
 	osmium::TagsFilter	postcodefilter{false};
 	postcodefilter.add_rule(true, osmium::TagMatcher{"boundary", "postal_code"});
 	osmium::area::MultipolygonManager<osmium::area::Assembler>

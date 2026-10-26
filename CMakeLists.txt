@@ -28,19 +28,8 @@ endif()
 find_package(Boost CONFIG 1.70.0 REQUIRED COMPONENTS program_options)
 include_directories(${Boost_INCLUDE_DIRS})
 
-find_package(PkgConfig)
-pkg_check_modules(LSI spatialindex)
-IF(NOT LSI_FOUND)
-	find_path(LSI_INCLUDE_DIRS
-			NAMES SpatialIndex.h
-			PATHS
-			/usr/include/spatialindex
-			/usr/include/spatialindex
-			${CMAKE_SYSROOT}/usr/local/include
-			${CMAKE_SYSROOT}/usr/local/include/spatialindex
-	)
-	find_library(LSI_LIBRARIES spatialindex)
-ENDIF(NOT LSI_FOUND)
+# Boost.Geometry (incl. the R-tree in boost/geometry/index/rtree.hpp) is
+# header-only, so no extra find_package() or library is needed here.
 
 find_path(JSON_INCLUDE_DIR
 	NAMES "nlohmann/json.hpp"
@@ -53,6 +42,6 @@ find_path(JSON_INCLUDE_DIR
 message("nlohmann directory ${JSON_INCLUDE_DIR}")
 
 add_executable(addressextract addressextract.cpp AbstractArea.cpp Address.cpp)
-include_directories(${Boost_INCLUDE_DIRS} ${LSI_INCLUDE_DIRS} ${JSON_INCLUDE_DIR} ${OSMIUM_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIRS} ${JSON_INCLUDE_DIR} ${OSMIUM_INCLUDE_DIRS})
 
-target_link_libraries(addressextract ${Boost_LIBRARIES} ${LSI_LIBRARIES} ${OSMIUM_LIBRARIES})
+target_link_libraries(addressextract ${Boost_LIBRARIES} ${OSMIUM_LIBRARIES})

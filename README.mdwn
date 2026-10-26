@@ -53,7 +53,7 @@ Build
 =====
 
 	apt-get install build-essential cmake-data cmake libboost-all-dev \
-	    libspatialindex-dev libgdal-dev libbz2-dev libexpat1-dev
+	    libgdal-dev libbz2-dev libexpat1-dev
 
 	git clone https://github.com/flohoff/addressextract.git
 

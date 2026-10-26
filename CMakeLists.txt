@@ -28,8 +28,12 @@ endif()
 find_package(Boost CONFIG 1.70.0 REQUIRED COMPONENTS program_options)
 include_directories(${Boost_INCLUDE_DIRS})
 
-# Boost.Geometry (incl. the R-tree in boost/geometry/index/rtree.hpp) is
-# header-only, so no extra find_package() or library is needed here.
+find_path(BOOST_GEOMETRY_INCLUDE_DIR
+	NAMES boost/geometry/index/rtree.hpp
+	HINTS ${Boost_INCLUDE_DIRS})
+if(NOT BOOST_GEOMETRY_INCLUDE_DIR)
+	message(FATAL_ERROR "Boost.Geometry headers not found (needs boost/geometry/index/rtree.hpp)")
+endif()
 
 find_path(JSON_INCLUDE_DIR
 	NAMES "nlohmann/json.hpp"

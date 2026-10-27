@@ -1,29 +1,14 @@
 
 #include <cstdlib>    // for std::exit
-#include <cstring>    // for std::strcmp
 #include <fstream>    // for std::ofstream
 #include <iostream>   // for std::cout, std::cerr
 #include <sstream>    // for std::ostringstream
-#include <functional> // for std::bind std::function
 
-// For assembling multipolygons
+#include <osmium/tags/tags_filter.hpp>
 #include <osmium/area/assembler.hpp>
 #include <osmium/area/multipolygon_manager.hpp>
-
-// For the DynamicHandler class
-#include <osmium/dynamic_handler.hpp>
-
-// For the Dump handler
-#include <osmium/handler/dump.hpp>
-
-// For the NodeLocationForWays handler
 #include <osmium/handler/node_locations_for_ways.hpp>
-
-// Allow any format of input files (XML, PBF, ...)
 #include <osmium/io/any_input.hpp>
-
-// For the location index. There are different types of indexes available.
-// This will work for all input files keeping the index in memory.
 #include <osmium/index/map/flex_mem.hpp>
 
 #include <boost/program_options.hpp>

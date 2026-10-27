@@ -2,12 +2,9 @@
 #define BUILDING_HPP
 
 #include <osmium/osm/area.hpp>
-#include <nlohmann/json.hpp>
 #include "AbstractArea.hpp"
 
 #include "Address.h"
-
-using json = nlohmann::json;
 
 class Building : public AbstractArea {
 public:

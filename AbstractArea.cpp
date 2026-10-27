@@ -1,6 +1,6 @@
-#include <iostream>
+#include <cstdio>
+
 #include <gdalcpp.hpp>
-#include <osmium/osm/area.hpp>
 
 #include "AbstractArea.hpp"
 

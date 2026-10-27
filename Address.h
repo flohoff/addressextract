@@ -1,13 +1,12 @@
 #ifndef ADDRESS_H
 #define ADDRESS_H
 
-#include <osmium/tags/tags_filter.hpp>
+#include <osmium/osm/tag.hpp>
 
 #include <iosfwd>
 #include <vector>
 #include <string>
 #include <map>
-#include <list>
 #include <optional>
 
 namespace Address {

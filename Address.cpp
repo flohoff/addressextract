@@ -1,6 +1,6 @@
 #include "Address.h"
 
-#include <iostream>
+#include <ostream>
 
 #include <nlohmann/json.hpp>
 #include <optional>

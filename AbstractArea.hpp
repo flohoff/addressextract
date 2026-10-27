@@ -2,7 +2,6 @@
 #define ABSTRACTAREA_HPP
 
 #include <gdalcpp.hpp>
-#include <osmium/osm/area.hpp>
 
 class AbstractArea {
 	public:

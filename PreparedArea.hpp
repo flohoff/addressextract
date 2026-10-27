@@ -2,7 +2,7 @@
 #define PREPAREDAREA_HPP
 
 #include <gdalcpp.hpp>
-#include <osmium/osm/area.hpp>
+
 #include "AbstractArea.hpp"
 
 class PreparedArea : public AbstractArea {

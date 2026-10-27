@@ -1,6 +1,4 @@
 
-#include <osmium/tags/tags_filter.hpp>
-#include <osmium/handler.hpp>
 #include <osmium/osm/way.hpp>
 #include <osmium/osm/node.hpp>
 #include <osmium/osm/area.hpp>

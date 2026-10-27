@@ -3,7 +3,7 @@
 
 #include <osmium/handler.hpp>
 #include <osmium/geom/ogr.hpp>
-#include <iostream>
+#include <ostream>
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>

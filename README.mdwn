@@ -1,11 +1,11 @@
 
-`addressextract` parses an OpenStreetmap PBF file and exports all addresses e.g. objects with `addr:*`
-tags on them. It also reassembles admin and postcode boundarys and extends the addressinformation
-with those.
+`addressextract` parses an OpenStreetmap PBF file and exports all addresses
+e.g. objects with `addr:*` tags on them. It also reassembles admin and postcode
+boundarys and extends the addressinformation with those.
 
 A typical address looks like this:
 
-    {
+    
       "city": "Paderborn",
       "geomcity": "Paderborn",
       "geomcounty": "Kreis Paderborn",
@@ -36,7 +36,7 @@ describing problems with this address - It could look like this:
 Usage
 =====
 
-	addressextract -i mylocal.pbf -o addresses.json
+	addressextract [-e] -i mylocal.pbf -o addresses.json
 
 Filtering and extracting
 ========================

@@ -190,9 +190,7 @@ public:
 	}
 
 	void dump_stats(std::ostream& os) {
-		os << " GRID_MAX_LEVEL " << GRID_MAX_LEVEL
-			<< std::endl
-			<< " Inserts: "
+		os << " Inserts: "
 			<< inserts << std::endl
 			<< " Cacheentriespos: "
 			<< cacheentriespos << std::endl

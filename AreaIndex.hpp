@@ -37,6 +37,7 @@ public:
 	int	inserts=0;
 	int	cachehitpos=0;
 	int	cacheentriespos=0;
+	int	depthhist[8]={0};
 
 private:
 	/* Envelope of an area as an rtree box */
@@ -81,11 +82,6 @@ public:
 			list->push_back((AreaType *) v.second);
 	}
 
-/* Recursive (quadtree) segmentation */
-#ifndef GRID_MAX_LEVEL
-#define GRID_MAX_LEVEL	4
-#endif
-
 	std::unique_ptr<OGRGeometry> grid_cell(double minX, double minY, double maxX, double maxY) {
 		auto ring=std::make_unique<OGRLinearRing>();
 
@@ -116,9 +112,19 @@ public:
 		cachevector.push_back(std::move(cachea));
 	}
 
+	/* Per-geometry grid depth */
+	int cache_depth(AreaType *area) {
+		/* WkbSize/25 approximates node count */
+		size_t wkb=area->geometry->WkbSize();
+		if (wkb < (size_t)512*25) return 3;
+		if (wkb < (size_t)4096*25) return 4;
+		return 5;
+	}
+
 	/* Recurse down the quadtree */
 	void cache_subdivide(AreaType *area, const osmium::Area& osmarea,
-			double minX, double minY, double maxX, double maxY, int level) {
+			double minX, double minY, double maxX, double maxY, int level,
+			int maxlevel) {
 		auto cell=grid_cell(minX, minY, maxX, maxY);
 
 		/* Cells fully outside the geometry */
@@ -131,23 +137,27 @@ public:
 			return;
 		}
 
-		if (level >= GRID_MAX_LEVEL)
+		if (level >= maxlevel)
 			return;
 
 		double	midX=(minX+maxX)/2;
 		double	midY=(minY+maxY)/2;
 
-		cache_subdivide(area, osmarea, minX, minY, midX, midY, level+1);
-		cache_subdivide(area, osmarea, midX, minY, maxX, midY, level+1);
-		cache_subdivide(area, osmarea, minX, midY, midX, maxY, level+1);
-		cache_subdivide(area, osmarea, midX, midY, maxX, maxY, level+1);
+		cache_subdivide(area, osmarea, minX, minY, midX, midY, level+1, maxlevel);
+		cache_subdivide(area, osmarea, midX, minY, maxX, midY, level+1, maxlevel);
+		cache_subdivide(area, osmarea, minX, midY, midX, maxY, level+1, maxlevel);
+		cache_subdivide(area, osmarea, midX, midY, maxX, maxY, level+1, maxlevel);
 	}
 
 	void insert_cache_grid(AreaType *area, const osmium::Area& osmarea) {
 		OGREnvelope	env;
 		area->envelope(env);
 
-		cache_subdivide(area, osmarea, env.MinX, env.MinY, env.MaxX, env.MaxY, 0);
+		int depth=cache_depth(area);
+		depthhist[depth]++;
+
+		cache_subdivide(area, osmarea, env.MinX, env.MinY, env.MaxX, env.MaxY,
+				0, depth);
 	}
 
 	void insert(AreaType *area, const osmium::Area& osmarea) {
@@ -194,7 +204,11 @@ public:
 			<< cachehitpos << std::endl
 			<< " Compared: "
 			<< compared << std::endl
-			<< std::endl;
+			<< " Depthhist:";
+			for(int i=0;i<8;i++)
+				if (depthhist[i])
+					os << " " << i << ":" << depthhist[i];
+			os << std::endl;
 	}
 };
 

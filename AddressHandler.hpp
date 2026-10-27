@@ -16,15 +16,15 @@
 
 #include "Address.h"
 
-/* Order by admin_level and cache entries first */
+/* Most specific first, then by id */
 static bool compare_admin_level(Boundary *a, Boundary *b) {
 	if (a->admin_level > b->admin_level) return true;
 	if (a->admin_level < b->admin_level) return false;
 
-	if (a->cache > b->cache) return true;
-	if (a->cache < b->cache) return false;
+	if (a->id < b->id) return true;
+	if (a->id > b->id) return false;
 
-	return a->id < b->id;
+	return a->cache > b->cache;
 };
 
 static bool postcode_compare(PostCode *a, PostCode *b) {

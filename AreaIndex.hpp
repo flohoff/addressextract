@@ -36,7 +36,6 @@ public:
 	int	queries=0;
 	int	inserts=0;
 	int	cachehitpos=0;
-	int	cachehitneg=0;
 	int	cacheentriespos=0;
 
 private:
@@ -82,9 +81,10 @@ public:
 			list->push_back((AreaType *) v.second);
 	}
 
-/* Recursive (quadtree) segmentation of the area envelope. */
+/* Recursive (quadtree) segmentation */
+#ifndef GRID_MAX_LEVEL
 #define GRID_MAX_LEVEL	4
-#define CACHE_NEGATIVE_CELLS 0
+#endif
 
 	std::unique_ptr<OGRGeometry> grid_cell(double minX, double minY, double maxX, double maxY) {
 		auto ring=std::make_unique<OGRLinearRing>();
@@ -103,13 +103,12 @@ public:
 	}
 
 	void cache_insert_cell(AreaType *area, const osmium::Area& osmarea,
-			std::unique_ptr<OGRGeometry> cell, bool within) {
+			std::unique_ptr<OGRGeometry> cell) {
 
 		auto cachea=std::make_unique<AreaType>(std::move(cell), osmarea, false);
 
+		/* Cache cells are only inserted fully within their parent */
 		cachea->cache=true;
-		cachea->cachewithin=within;
-		cachea->cacheintersects=within;
 		cachea->parent=area;
 
 		cacheentriespos++;
@@ -128,7 +127,7 @@ public:
 		}
 
 		if (area->contains(cell.get())) {
-			cache_insert_cell(area, osmarea, std::move(cell), true);
+			cache_insert_cell(area, osmarea, std::move(cell));
 			return;
 		}
 
@@ -181,7 +180,9 @@ public:
 	}
 
 	void dump_stats(std::ostream& os) {
-		os << " Inserts: "
+		os << " GRID_MAX_LEVEL " << GRID_MAX_LEVEL
+			<< std::endl
+			<< " Inserts: "
 			<< inserts << std::endl
 			<< " Cacheentriespos: "
 			<< cacheentriespos << std::endl
@@ -191,8 +192,6 @@ public:
 			<< returned << std::endl
 			<< " Cachehitpos: "
 			<< cachehitpos << std::endl
-			<< " Cachehitneg: "
-			<< cachehitneg << std::endl
 			<< " Compared: "
 			<< compared << std::endl
 			<< std::endl;

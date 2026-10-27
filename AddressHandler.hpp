@@ -18,14 +18,15 @@
 
 #include "Address.h"
 
+/* Order by admin_level and cache entries first */
 static bool compare_admin_level(Boundary *a, Boundary *b) {
-	if (a->cache > b->cache) return true;
-	if (a->cache < b->cache) return false;
-
 	if (a->admin_level > b->admin_level) return true;
 	if (a->admin_level < b->admin_level) return false;
 
-	return false;
+	if (a->cache > b->cache) return true;
+	if (a->cache < b->cache) return false;
+
+	return a->id < b->id;
 };
 
 static bool postcode_compare(PostCode *a, PostCode *b) {
@@ -104,23 +105,6 @@ public:
 		return false;
 	}
 
-	bool extend_city_boundary_check(Address::Object& address, Boundary *b, OGRGeometry *geom) {
-		if (b->cache) {
-			if (b->cachewithin) {
-				boundaryindex.cachehitpos++;
-				extend_city_boundary(address, b->parent);
-				return true;
-			}
-
-			if (!b->cachewithin && !b->cacheintersects) {
-				boundaryindex.cachehitneg++;
-				return false;
-			}
-			// Intersects
-		}
-		return extend_city_boundary_check_intersect(address, b, geom);
-	}
-
 	void extend_city(Address::Object& address, OGRGeometry *geom) {
 		static std::vector<Boundary*>	boundarylist;
 
@@ -138,11 +122,17 @@ public:
 			if (b->admin_level > 10)
 				continue;
 
-			bool hit=extend_city_boundary_check(address, b, geom);
+			if (b->cache) {
+				boundaryindex.cachehitpos++;
+				extend_city_boundary(address, b->parent);
+				extend_city_boundary_up(address, b->parent);
+				break;
+			}
 
-			if (!t_nocache && hit) {
-				/* Cachegrid cells hold their real boundary in parent; */
-				extend_city_boundary_up(address, b->cache ? b->parent : b);
+			bool hit=extend_city_boundary_check_intersect(address, b, geom);
+
+			if (hit && !t_nocache) {
+				extend_city_boundary_up(address, b);
 				break;
 			}
 		}
@@ -163,16 +153,9 @@ public:
 			postcodeindex.returned++;
 
 			if (i->cache) {
-				if (i->cachewithin) {
-					address.tag_add_name("geom:postcode", i->parent->postcode.c_str());
-					postcodeindex.cachehitpos++;
-					break;
-				}
-				/* Would be very strange */
-				if (!i->cacheintersects && !i->cachewithin) {
-					postcodeindex.cachehitneg++;
-					continue;
-				}
+				address.tag_add_name("geom:postcode", i->parent->postcode.c_str());
+				postcodeindex.cachehitpos++;
+				break;
 			}
 
 			postcodeindex.compared++;

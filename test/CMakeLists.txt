@@ -1,9 +1,12 @@
 add_executable(unittests
 	test_address.cpp
 	test_areas.cpp
-	test_areaindex.cpp)
+	test_areaindex.cpp
+	test_handler.cpp
+	test_run.cpp)
 target_link_libraries(unittests addresscore Catch2::Catch2WithMain ${OSMIUM_LIBRARIES})
 target_include_directories(unittests PRIVATE ${CMAKE_SOURCE_DIR})
+target_compile_definitions(unittests PRIVATE TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 
 include(Catch)
 catch_discover_tests(unittests)
@@ -53,4 +56,6 @@ endif()
 add_test(NAME cli_help COMMAND addressextract --help)
 set_tests_properties(cli_help PROPERTIES WILL_FAIL TRUE)   # exits 1
 add_test(NAME cli_missing_args COMMAND addressextract)
-set_tests_properties(cli_missing_args PROPERTIES WILL_FAIL TRUE)
+add_test(NAME cli_missing_outfile COMMAND addressextract -i ${SYNTH})
+add_test(NAME cli_unknown_option COMMAND addressextract --bogus)
+set_tests_properties(cli_missing_args cli_missing_outfile cli_unknown_option PROPERTIES WILL_FAIL TRUE)

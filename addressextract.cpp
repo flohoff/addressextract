@@ -11,7 +11,6 @@
 #include <osmium/io/any_input.hpp>
 #include <osmium/index/map/flex_mem.hpp>
 
-#include <boost/program_options.hpp>
 #include <nlohmann/json.hpp>
 
 #include "Building.hpp"
@@ -19,6 +18,7 @@
 #include "PostCode.hpp"
 #include "AreaIndex.hpp"
 #include "AddressHandler.hpp"
+#include "addressextract.hpp"
 
 // The type of index used. This must match the include file above
 using index_type = osmium::index::map::FlexMem<osmium::unsigned_object_id_type, osmium::Location>;
@@ -29,15 +29,9 @@ using location_handler_type = osmium::handler::NodeLocationsForWays<index_type>;
 #define DEBUG 0
 
 using json = nlohmann::json;
-namespace po = boost::program_options;
-
-static bool t_errors=false;
-static bool t_missing=false;
-static bool t_nocache=false;
 
 void boundary_add_parent(AreaIndex<Boundary>& index, Boundary *b) {
 	std::vector<Boundary*> list;
-	list.clear();
 	index.findoverlapping(b, &list);
 	std::sort(list.begin(), list.end(), compare_admin_level);
 
@@ -67,9 +61,9 @@ void boundaryindex_add_hierarchy(AreaIndex<Boundary>& index) {
 	}
 }
 
-void process_file(po::variables_map& vm) {
+void process_file(const Options& opts) {
 
-	osmium::io::File input_file{vm["infile"].as<std::string>()};
+	osmium::io::File input_file{opts.infile};
 
 	osmium::area::Assembler::config_type assembler_config;
 
@@ -79,13 +73,13 @@ void process_file(po::variables_map& vm) {
 	osmium::area::MultipolygonManager<osmium::area::Assembler>
 		buildingmp_manager{assembler_config, buildingfilter};
 
-	AreaIndex<Boundary>	boundaryindex(!t_nocache);
+	AreaIndex<Boundary>	boundaryindex(!opts.nocache);
 	osmium::TagsFilter	boundaryfilter{false};
 	boundaryfilter.add_rule(true, "boundary", "administrative");
 	osmium::area::MultipolygonManager<osmium::area::Assembler>
 		boundarymp_manager{assembler_config, boundaryfilter};
 
-	AreaIndex<PostCode>	postcodeindex(!t_nocache);
+	AreaIndex<PostCode>	postcodeindex(!opts.nocache);
 	osmium::TagsFilter	postcodefilter{false};
 	postcodefilter.add_rule(true, osmium::TagMatcher{"boundary", "postal_code"});
 	osmium::area::MultipolygonManager<osmium::area::Assembler>
@@ -126,10 +120,10 @@ void process_file(po::variables_map& vm) {
 	);
 	reader.close();
 
-	if (!t_nocache)
+	if (!opts.nocache)
 		boundaryindex_add_hierarchy(boundaryindex);
 
-	std::ofstream outfile(vm["outfile"].as<std::string>());
+	std::ofstream outfile(opts.outfile);
 
 	outfile << "{" << std::endl
 		<< "\"meta\": " << jmeta << "," << std::endl
@@ -155,10 +149,10 @@ void process_file(po::variables_map& vm) {
 			boundaryindex,
 			postcodeindex,
 			buildingindex,
-			t_errors,
-			t_missing,
-			t_nocache,
-			vm["postcoderegex"].as<std::string>()};
+			opts.errors,
+			opts.missing,
+			opts.nocache,
+			opts.postcoderegex};
 
 	/* On the follow-up read pass the location index is already fully
 	 * populated, so only the way() lookups are needed. Re-feeding every
@@ -188,43 +182,13 @@ void process_file(po::variables_map& vm) {
 	outfile << pendingline << std::endl;
 	outfile << "]}" << std::endl;
 
-	std::cerr << "Stats buildingindex: " << std::endl;
-	buildingindex.dump_stats(std::cerr);
-	std::cerr << "Stats postcodeindex: " << std::endl;
-	postcodeindex.dump_stats(std::cerr);
-	std::cerr << "Stats boundaryindex: " << std::endl;
-	boundaryindex.dump_stats(std::cerr);
-
-}
-
-int main(int argc, char* argv[]) {
-
-	po::options_description         desc("Allowed options");
-	desc.add_options()
-		("help,h", "produce help message")
-		("errors,e", po::bool_switch(&t_errors), "Do error analysis")
-		("missing,m", po::bool_switch(&t_missing), "Only add missing postcode and city")
-		("nocache", po::bool_switch(&t_nocache), "Do not use boundary caching")
-		("postcoderegex", po::value<std::string>()->default_value("^[0-9]{5}$"), "Postcode validation regex")
-		("infile,i", po::value<std::string>()->required(), "Input file")
-		("outfile,o", po::value<std::string>()->required(), "Output file")
-	;
-	po::variables_map vm;
-	try {
-		po::store(po::parse_command_line(argc, argv, desc), vm);
-		/* --help must work without the required options */
-		if (!vm.count("help"))
-			po::notify(vm);
-	} catch(const boost::program_options::error& e) {
-		std::cerr << "Error: " << e.what() << "\n";
-		std::cout << desc << std::endl;
-		exit(-1);
+	if (opts.verbose) {
+		std::cout << "Stats buildingindex: " << std::endl;
+		buildingindex.dump_stats(std::cout);
+		std::cout << "Stats postcodeindex: " << std::endl;
+		postcodeindex.dump_stats(std::cout);
+		std::cout << "Stats boundaryindex: " << std::endl;
+		boundaryindex.dump_stats(std::cout);
 	}
 
-	if (vm.count("help")) {
-		std::cout << desc << "\n";
-		return 1;
-	}
-
-	process_file(vm);
 }

@@ -132,6 +132,17 @@ Without `-DENABLE_COVERAGE=ON` only `ctest --test-dir build
 --output-junit junit.xml` is needed. If Catch2 is not installed the tests
 are skipped silently; `-DBUILD_TESTING=OFF` disables them explicitly.
 
+Mutation testing uses Mull (clang 19 + `mull-runner-19`):
+
+    CXX=clang++-19 cmake -S . -B build-mull -DENABLE_MULL=ON -DCMAKE_BUILD_TYPE=Debug
+    cmake --build build-mull
+    cd build-mull && mull-runner-19 ./test/unittests --workers 8 \
+        --reporters IDE --reporters Elements
+
+Known false positives: removed calls with temporary arguments such as
+`address.error_add("...")` are reported as survived even though the golden
+tests catch the same change when applied by hand.
+
 Besides the Catch2 unit tests there are end to end tests that run the
 program on `test/data/synthetic.osm` (OSM XML, so diffs stay readable in
 git) and compare the result with the `test/data/expected_*.json` golden

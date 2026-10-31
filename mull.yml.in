@@ -1,0 +1,11 @@
+mutators:
+  - cxx_all
+  - cxx_logical
+  - cxx_calls
+  - negate_mutator
+  - scalar_value_mutator
+timeout: 60000
+includePaths:
+  - @CMAKE_SOURCE_DIR@/.*\.(cpp|hpp|h)$
+excludePaths:
+  - @CMAKE_SOURCE_DIR@/test/.*

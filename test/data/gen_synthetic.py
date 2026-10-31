@@ -36,6 +36,8 @@ def area(pts, tags):
     rel(w, t)
 
 area(box(8.40, 51.90, 8.80, 52.30), {"boundary": "administrative", "admin_level": "6", "name": "Kreis Test"})
+# same admin_level as its container, listed first: must not become its parent
+area(box(8.60, 52.12, 8.615, 52.135), {"boundary": "administrative", "admin_level": "8", "name": "Innenstadt"})
 area(box(8.50, 52.00, 8.70, 52.20), {"boundary": "administrative", "admin_level": "8", "name": "Teststadt"})
 area([(8.55, 52.00), (8.60, 52.05), (8.55, 52.10), (8.50, 52.05)],
      {"boundary": "administrative", "admin_level": "10", "name": "Altstadt"})
@@ -70,6 +72,7 @@ def addr(lon, lat, **over):
 addr(8.5250, 52.0250)                                   # in suburb: clean
 addr(8.6500, 52.1000, addr_city="Teststadt")            # in city, outside suburb
 addr(8.6500, 52.1500, addr_housenumber=None)            # No housenumber
+addr(8.6075, 52.1275)                                   # inside same level nested boundary
 addr(8.6200, 52.1400, addr_postcode="33699")            # postcode mismatch
 addr(8.6500, 52.1700, addr_city="Falschstadt")          # city mismatch
 addr(8.6600, 52.1000, addr_country="Deutschland")       # country format

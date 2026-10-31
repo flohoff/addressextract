@@ -48,15 +48,27 @@ message("nlohmann directory ${JSON_INCLUDE_DIR}")
 include_directories(${Boost_INCLUDE_DIRS} ${JSON_INCLUDE_DIR} ${OSMIUM_INCLUDE_DIRS})
 
 # Code shared between the program and the unit tests
-add_library(addresscore STATIC AbstractArea.cpp Address.cpp)
+add_library(addresscore STATIC AbstractArea.cpp Address.cpp addressextract.cpp)
 target_link_libraries(addresscore ${OSMIUM_LIBRARIES})
 
-add_executable(addressextract addressextract.cpp)
-target_link_libraries(addressextract addresscore ${Boost_LIBRARIES} ${OSMIUM_LIBRARIES})
+add_executable(addressextract main.cpp)
+target_link_libraries(addressextract addresscore ${Boost_LIBRARIES})
 
 # Unit tests: ctest, JUnit output: ctest --output-junit junit.xml
 option(ENABLE_COVERAGE "Build with gcov instrumentation" OFF)
 option(BUILD_TESTING "Build the unit tests" ON)
+
+# Mutation testing: clang + mull plugin, see README
+option(ENABLE_MULL "Build with the Mull mutation plugin (needs clang)" OFF)
+set(MULL_PLUGIN /usr/lib/mull-ir-frontend-19 CACHE FILEPATH "Mull IR frontend plugin")
+if(ENABLE_MULL)
+	if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		message(FATAL_ERROR "ENABLE_MULL needs clang, e.g. -DCMAKE_CXX_COMPILER=clang++-19")
+	endif()
+	# the plugin reads mull.yml from the build dir at compile time
+	configure_file(${CMAKE_SOURCE_DIR}/mull.yml.in ${CMAKE_BINARY_DIR}/mull.yml @ONLY)
+	target_compile_options(addresscore PUBLIC -O0 -g -grecord-command-line -fpass-plugin=${MULL_PLUGIN})
+endif()
 
 if(ENABLE_COVERAGE)
 	set(COVERAGE_FLAGS --coverage -O0 -g)

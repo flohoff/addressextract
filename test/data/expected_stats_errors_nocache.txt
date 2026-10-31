@@ -1,0 +1,24 @@
+Stats buildingindex: 
+ Inserts: 2
+ Cacheentriespos: 0
+ Queries: 21
+ Returned: 3
+ Cachehitpos: 0
+ Compared: 3
+ Depthhist:
+Stats postcodeindex: 
+ Inserts: 1
+ Cacheentriespos: 0
+ Queries: 24
+ Returned: 11
+ Cachehitpos: 0
+ Compared: 11
+ Depthhist:
+Stats boundaryindex: 
+ Inserts: 5
+ Cacheentriespos: 0
+ Queries: 24
+ Returned: 52
+ Cachehitpos: 0
+ Compared: 51
+ Depthhist:

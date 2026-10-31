@@ -1,5 +1,9 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include <functional>
+#include <iostream>
+#include <sstream>
+
 #include <ogr_geometry.h>
 
 #include "AbstractArea.hpp"
@@ -65,6 +69,7 @@ TEST_CASE("Boundary parses name, admin_level and county type") {
 	REQUIRE(b.admin_level == 6);
 	REQUIRE(b.valid());
 	REQUIRE_FALSE(b.is_county());
+	REQUIRE(b.boundarytype == BTYPE_CITY);
 
 	TestArea kreis({{"name", "Kreis X"}, {"admin_level", "6"}});
 	Boundary k(box_polygon(0, 0, 1, 1), kreis.area());
@@ -116,4 +121,28 @@ TEST_CASE("Building is valid only with address tags") {
 TEST_CASE("AbstractArea dump does not crash") {
 	AbstractArea a(box_polygon(0, 0, 1, 1));
 	a.dump();
+}
+
+TEST_CASE("Building keeps the osm object id") {
+	TestArea ta({{"building", "yes"}, {"addr:housenumber", "5"}}, 10);
+	Building b(box_polygon(0, 0, 1, 1), ta.area());
+	REQUIRE(b.id == 5);
+}
+
+static std::string cerr_of(std::function<void()> fn) {
+	std::ostringstream captured;
+	auto *old=std::cerr.rdbuf(captured.rdbuf());
+	fn();
+	std::cerr.rdbuf(old);
+	return captured.str();
+}
+
+TEST_CASE("Invalid boundary is reported with type and id") {
+	TestArea way({{"admin_level", "8"}}, 6);
+	auto msg=cerr_of([&] { Boundary b(box_polygon(0, 0, 1, 1), way.area()); });
+	REQUIRE(msg.find("Boundary constructor called for way 3") != std::string::npos);
+
+	TestArea relation({{"admin_level", "8"}}, 7);
+	msg=cerr_of([&] { Boundary b(box_polygon(0, 0, 1, 1), relation.area()); });
+	REQUIRE(msg.find("Boundary constructor called for relation 3") != std::string::npos);
 }

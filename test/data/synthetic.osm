@@ -4,165 +4,175 @@
   <node id="2" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="51.90000" lon="8.80000"/>
   <node id="3" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.30000" lon="8.80000"/>
   <node id="4" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.30000" lon="8.40000"/>
-  <node id="5" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="8.50000"/>
-  <node id="6" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="8.70000"/>
-  <node id="7" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.20000" lon="8.70000"/>
-  <node id="8" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.20000" lon="8.50000"/>
-  <node id="9" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="8.55000"/>
-  <node id="10" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.05000" lon="8.60000"/>
-  <node id="11" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="8.55000"/>
-  <node id="12" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.05000" lon="8.50000"/>
-  <node id="13" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11000" lon="8.51000"/>
-  <node id="14" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11000" lon="8.52000"/>
-  <node id="15" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.12000" lon="8.52000"/>
-  <node id="16" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.12000" lon="8.51000"/>
-  <node id="17" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="51.95000" lon="8.45000"/>
-  <node id="18" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="51.95000" lon="8.65000"/>
-  <node id="19" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.15000" lon="8.65000"/>
-  <node id="20" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.15000" lon="8.45000"/>
-  <node id="21" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="9.00000"/>
-  <node id="22" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="9.10000"/>
-  <node id="23" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="9.10000"/>
-  <node id="24" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="9.00000"/>
-  <node id="25" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.16000" lon="8.45000"/>
-  <node id="26" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.16000" lon="8.46000"/>
-  <node id="27" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.17000" lon="8.46000"/>
-  <node id="28" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.17000" lon="8.45000"/>
-  <node id="29" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02000" lon="8.52000"/>
-  <node id="30" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02000" lon="8.52100"/>
-  <node id="31" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02100" lon="8.52100"/>
-  <node id="32" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02100" lon="8.52000"/>
-  <node id="33" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.04000" lon="8.54000"/>
-  <node id="34" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.04000" lon="8.54100"/>
-  <node id="35" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.04100" lon="8.54000"/>
-  <node id="36" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.03000" lon="8.53000"/>
-  <node id="37" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.03000" lon="8.53100"/>
-  <node id="38" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.03100" lon="8.53100"/>
-  <node id="39" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.03100" lon="8.53000"/>
-  <node id="40" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02500" lon="8.52500">
+  <node id="5" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.12000" lon="8.60000"/>
+  <node id="6" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.12000" lon="8.61500"/>
+  <node id="7" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.13500" lon="8.61500"/>
+  <node id="8" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.13500" lon="8.60000"/>
+  <node id="9" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="8.50000"/>
+  <node id="10" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="8.70000"/>
+  <node id="11" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.20000" lon="8.70000"/>
+  <node id="12" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.20000" lon="8.50000"/>
+  <node id="13" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="8.55000"/>
+  <node id="14" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.05000" lon="8.60000"/>
+  <node id="15" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="8.55000"/>
+  <node id="16" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.05000" lon="8.50000"/>
+  <node id="17" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11000" lon="8.51000"/>
+  <node id="18" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11000" lon="8.52000"/>
+  <node id="19" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.12000" lon="8.52000"/>
+  <node id="20" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.12000" lon="8.51000"/>
+  <node id="21" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="51.95000" lon="8.45000"/>
+  <node id="22" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="51.95000" lon="8.65000"/>
+  <node id="23" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.15000" lon="8.65000"/>
+  <node id="24" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.15000" lon="8.45000"/>
+  <node id="25" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="9.00000"/>
+  <node id="26" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="9.10000"/>
+  <node id="27" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="9.10000"/>
+  <node id="28" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="9.00000"/>
+  <node id="29" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.16000" lon="8.45000"/>
+  <node id="30" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.16000" lon="8.46000"/>
+  <node id="31" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.17000" lon="8.46000"/>
+  <node id="32" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.17000" lon="8.45000"/>
+  <node id="33" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02000" lon="8.52000"/>
+  <node id="34" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02000" lon="8.52100"/>
+  <node id="35" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02100" lon="8.52100"/>
+  <node id="36" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02100" lon="8.52000"/>
+  <node id="37" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.04000" lon="8.54000"/>
+  <node id="38" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.04000" lon="8.54100"/>
+  <node id="39" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.04100" lon="8.54000"/>
+  <node id="40" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.03000" lon="8.53000"/>
+  <node id="41" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.03000" lon="8.53100"/>
+  <node id="42" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.03100" lon="8.53100"/>
+  <node id="43" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.03100" lon="8.53000"/>
+  <node id="44" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02500" lon="8.52500">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="41" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="8.65000">
+  <node id="45" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="8.65000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="42" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.15000" lon="8.65000">
+  <node id="46" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.15000" lon="8.65000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="43" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.14000" lon="8.62000">
+  <node id="47" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.12750" lon="8.60750">
+    <tag k="addr:street" v="Hauptstraße"/>
+    <tag k="addr:housenumber" v="1"/>
+    <tag k="addr:city" v="Teststadt"/>
+    <tag k="addr:postcode" v="33602"/>
+  </node>
+  <node id="48" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.14000" lon="8.62000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33699"/>
   </node>
-  <node id="44" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.17000" lon="8.65000">
+  <node id="49" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.17000" lon="8.65000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Falschstadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="45" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="8.66000">
+  <node id="50" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="8.66000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
     <tag k="addr:country" v="Deutschland"/>
   </node>
-  <node id="46" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11000" lon="8.66000">
+  <node id="51" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11000" lon="8.66000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="4a,b"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="47" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.12000" lon="8.66000">
+  <node id="52" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.12000" lon="8.66000">
     <tag k="addr:street" v="Haupt;str."/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="48" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.13000" lon="8.66000">
+  <node id="53" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.13000" lon="8.66000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="ABC"/>
   </node>
-  <node id="49" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.14000" lon="8.66000">
+  <node id="54" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.14000" lon="8.66000">
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="50" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.15000" lon="8.66000">
+  <node id="55" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.15000" lon="8.66000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="51" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="51.92000" lon="8.42000">
-    <tag k="addr:street" v="Hauptstraße"/>
-    <tag k="addr:housenumber" v="1"/>
-    <tag k="addr:city" v="Teststadt"/>
-    <tag k="addr:postcode" v="33602"/>
-  </node>
-  <node id="52" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="53.00000" lon="9.50000">
+  <node id="56" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="51.92000" lon="8.42000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="53" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02050" lon="8.52050">
+  <node id="57" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="53.00000" lon="9.50000">
+    <tag k="addr:street" v="Hauptstraße"/>
+    <tag k="addr:housenumber" v="1"/>
+    <tag k="addr:city" v="Teststadt"/>
+    <tag k="addr:postcode" v="33602"/>
+  </node>
+  <node id="58" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02050" lon="8.52050">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Andersstadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="54" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02055" lon="8.52055">
+  <node id="59" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.02055" lon="8.52055">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="55" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.05000" lon="9.05000">
+  <node id="60" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.05000" lon="9.05000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Freistadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="56" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.05000" lon="8.59950">
+  <node id="61" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.05000" lon="8.59950">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="57" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.04090" lon="8.54090">
+  <node id="62" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.04090" lon="8.54090">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </node>
-  <node id="58" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.19000" lon="8.63000">
+  <node id="63" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.19000" lon="8.63000">
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
   </node>
-  <node id="59" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="8.67000">
+  <node id="64" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="8.67000">
     <tag k="addr:housenumber" v="1"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
     <tag k="addr:place" v="Auf dem Berg"/>
   </node>
-  <node id="60" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="8.50000">
+  <node id="65" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.00000" lon="8.50000">
     <tag k="amenity" v="bench"/>
   </node>
-  <node id="61" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="8.60000"/>
-  <node id="62" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11000" lon="8.67000"/>
-  <node id="63" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11000" lon="8.67100"/>
-  <node id="64" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11100" lon="8.67100"/>
+  <node id="66" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.10000" lon="8.60000"/>
+  <node id="67" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11000" lon="8.67000"/>
+  <node id="68" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11000" lon="8.67100"/>
+  <node id="69" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1" lat="52.11100" lon="8.67100"/>
   <way id="1" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
     <nd ref="1"/>
     <nd ref="2"/>
@@ -218,52 +228,59 @@
     <nd ref="31"/>
     <nd ref="32"/>
     <nd ref="29"/>
+  </way>
+  <way id="9" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
+    <nd ref="33"/>
+    <nd ref="34"/>
+    <nd ref="35"/>
+    <nd ref="36"/>
+    <nd ref="33"/>
     <tag k="building" v="yes"/>
     <tag k="addr:street" v="Hauptstraße"/>
     <tag k="addr:housenumber" v="10"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </way>
-  <way id="9" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
-    <nd ref="33"/>
-    <nd ref="34"/>
-    <nd ref="35"/>
-    <nd ref="33"/>
+  <way id="10" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
+    <nd ref="37"/>
+    <nd ref="38"/>
+    <nd ref="39"/>
+    <nd ref="37"/>
     <tag k="building" v="yes"/>
     <tag k="addr:street" v="Dreieck"/>
     <tag k="addr:housenumber" v="20"/>
   </way>
-  <way id="10" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
-    <nd ref="36"/>
-    <nd ref="37"/>
-    <nd ref="38"/>
-    <nd ref="39"/>
-    <nd ref="36"/>
+  <way id="11" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
+    <nd ref="40"/>
+    <nd ref="41"/>
+    <nd ref="42"/>
+    <nd ref="43"/>
+    <nd ref="40"/>
     <tag k="building" v="yes"/>
   </way>
-  <way id="11" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
-    <nd ref="62"/>
-    <nd ref="63"/>
-    <nd ref="64"/>
+  <way id="12" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
+    <nd ref="67"/>
+    <nd ref="68"/>
+    <nd ref="69"/>
     <tag k="addr:street" v="Weg"/>
     <tag k="addr:housenumber" v="7"/>
     <tag k="addr:city" v="Teststadt"/>
     <tag k="addr:postcode" v="33602"/>
   </way>
-  <way id="12" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
-    <nd ref="62"/>
+  <way id="13" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
+    <nd ref="67"/>
     <nd ref="999999"/>
     <tag k="addr:street" v="Fehlt"/>
     <tag k="addr:housenumber" v="1"/>
   </way>
-  <way id="13" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
-    <nd ref="62"/>
+  <way id="14" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
+    <nd ref="67"/>
     <tag k="addr:street" v="Kurz"/>
     <tag k="addr:housenumber" v="2"/>
   </way>
-  <way id="14" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
-    <nd ref="62"/>
-    <nd ref="63"/>
+  <way id="15" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
+    <nd ref="67"/>
+    <nd ref="68"/>
     <tag k="highway" v="residential"/>
   </way>
   <relation id="1" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
@@ -278,37 +295,44 @@
     <tag k="type" v="multipolygon"/>
     <tag k="boundary" v="administrative"/>
     <tag k="admin_level" v="8"/>
-    <tag k="name" v="Teststadt"/>
+    <tag k="name" v="Innenstadt"/>
   </relation>
   <relation id="3" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
     <member type="way" ref="3" role="outer"/>
     <tag k="type" v="multipolygon"/>
     <tag k="boundary" v="administrative"/>
-    <tag k="admin_level" v="10"/>
-    <tag k="name" v="Altstadt"/>
+    <tag k="admin_level" v="8"/>
+    <tag k="name" v="Teststadt"/>
   </relation>
   <relation id="4" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
     <member type="way" ref="4" role="outer"/>
     <tag k="type" v="multipolygon"/>
     <tag k="boundary" v="administrative"/>
     <tag k="admin_level" v="10"/>
+    <tag k="name" v="Altstadt"/>
   </relation>
   <relation id="5" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
     <member type="way" ref="5" role="outer"/>
     <tag k="type" v="multipolygon"/>
-    <tag k="boundary" v="postal_code"/>
-    <tag k="postal_code" v="33602"/>
+    <tag k="boundary" v="administrative"/>
+    <tag k="admin_level" v="10"/>
   </relation>
   <relation id="6" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
     <member type="way" ref="6" role="outer"/>
+    <tag k="type" v="multipolygon"/>
+    <tag k="boundary" v="postal_code"/>
+    <tag k="postal_code" v="33602"/>
+  </relation>
+  <relation id="7" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
+    <member type="way" ref="7" role="outer"/>
     <tag k="type" v="multipolygon"/>
     <tag k="boundary" v="administrative"/>
     <tag k="admin_level" v="6"/>
     <tag k="name" v="Freistadt"/>
     <tag k="de:place" v="city"/>
   </relation>
-  <relation id="7" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
-    <member type="way" ref="7" role="outer"/>
+  <relation id="8" version="1" timestamp="2026-01-01T00:00:00Z" uid="1" user="t" changeset="1">
+    <member type="way" ref="8" role="outer"/>
     <tag k="type" v="multipolygon"/>
     <tag k="boundary" v="postal_code"/>
   </relation>

@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <functional>
+#include <limits>
 #include <utility>
 
 #include "AreaIndex.hpp"
@@ -59,9 +60,6 @@ public:
 	}
 
 	static bool isaddress(const osmium::TagList& tags) {
-		if (tags.empty())
-			return false;
-
 		for(auto &taginfo : Address::Tag::InfoList) {
 			if (tags.has_key(taginfo.tag))
 				return true;
@@ -114,6 +112,8 @@ public:
 		std::sort(boundarylist.begin(), boundarylist.end(), compare_admin_level);
 
 		boundaryindex.queries++;
+		/* nocache: only strictly lower levels after a hit, like the cached path */
+		int lastlevel=std::numeric_limits<int>::max();
 		for(auto b : boundarylist) {
 			boundaryindex.returned++;
 
@@ -124,7 +124,12 @@ public:
 				break;
 			}
 
+			if (t_nocache && b->admin_level >= lastlevel)
+				continue;
+
 			bool hit=extend_city_boundary_check_intersect(address, b, geom);
+			if (hit)
+				lastlevel=b->admin_level;
 
 			if (hit && !t_nocache) {
 				extend_city_boundary_up(address, b);

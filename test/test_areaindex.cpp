@@ -135,3 +135,25 @@ TEST_CASE("Cache grid depth grows with geometry size") {
 	REQUIRE(idx.cache_depth(&mid) == 4);
 	REQUIRE(idx.cache_depth(&big) == 5);
 }
+
+TEST_CASE("Comparators are irreflexive and order the cache flag") {
+	TestArea t({{"name", "n"}, {"admin_level", "8"}});
+	Boundary real(box_polygon(0, 0, 1, 1), t.area());
+	Boundary same(box_polygon(0, 0, 1, 1), t.area(), false);
+	same.id=real.id;
+	same.cache=true;
+
+	REQUIRE_FALSE(compare_admin_level(&real, &real));
+	REQUIRE_FALSE(compare_admin_level(&same, &same));
+	REQUIRE(compare_admin_level(&same, &real));
+	REQUIRE_FALSE(compare_admin_level(&real, &same));
+
+	TestArea p({{"postal_code", "1"}});
+	PostCode a(box_polygon(0, 0, 1, 1), p.area());
+	PostCode b(box_polygon(0, 0, 1, 1), p.area(), false);
+	b.cache=true;
+	REQUIRE(postcode_compare(&b, &a));
+	REQUIRE_FALSE(postcode_compare(&a, &b));
+	REQUIRE_FALSE(postcode_compare(&a, &a));
+	REQUIRE_FALSE(postcode_compare(&b, &b));
+}

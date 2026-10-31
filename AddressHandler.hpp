@@ -58,7 +58,7 @@ public:
 		postcode_regex=postcoderegexstring;
 	}
 
-	bool isaddress(const osmium::TagList& tags) {
+	static bool isaddress(const osmium::TagList& tags) {
 		if (tags.empty())
 			return false;
 

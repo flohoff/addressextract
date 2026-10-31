@@ -117,6 +117,19 @@ Todo
   33602,Bielefeld,LOOM, Bahnhofstraße,28,52.025702,8.531427,node,5202495577,33602,Bielefeld,,
 
 
+Design decisions
+================
+
+* **JSON output is always produced by nlohmann/json, never hand written.**
+  The input data (OSM tags such as street names, housenumbers and
+  postcodes) is heavily untrusted: it can contain quotes, backslashes,
+  control characters or invalid UTF-8. Correct escaping and number
+  formatting is security relevant, so it is left to a well tested library
+  instead of a home grown encoder. A hand rolled serializer is measurably
+  faster (about 1s of 19s with `-e` on `owl.pbf`), but this is not worth
+  the risk and maintenance burden and is deliberately not done.
+
+
 Copyright
 =========
 

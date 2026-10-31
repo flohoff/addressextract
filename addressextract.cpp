@@ -105,7 +105,9 @@ void process_file(po::variables_map& vm) {
 	location_handler.ignore_errors();
 
 	std::cerr << "Building geometry indexes for boundarys, postcodes and buildings" << std::endl;
-	osmium::io::Reader reader{input_file};
+	/* Relations were consumed by read_relations() already */
+	osmium::io::Reader reader{input_file,
+		osmium::osm_entity_bits::node | osmium::osm_entity_bits::way};
 	osmium::io::Header header{reader.header()};
 
 	json	jmeta;
@@ -172,14 +174,18 @@ void process_file(po::variables_map& vm) {
 	public:
 		explicit WayOnlyLocationHandler(location_handler_type& lh) : m_lh(lh) { }
 		void way(osmium::Way& way) {
-			m_lh.way(way);
+			/* Only address ways are ever turned into geometries */
+			if (AddressHandler::isaddress(way.tags()))
+				m_lh.way(way);
 		}
 		void node(const osmium::Node& node) { (void)node; }
 	} wayonlylocationhandler{location_handler};
 
 
 
-	osmium::io::Reader readerpass3{input_file};
+	/* Relations are not needed anymore - areas are not assembled here */
+	osmium::io::Reader readerpass3{input_file,
+		osmium::osm_entity_bits::node | osmium::osm_entity_bits::way};
 	osmium::apply(readerpass3,
 			wayonlylocationhandler,
 			ahandler);

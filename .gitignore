@@ -10,3 +10,4 @@ Makefile
 CMakeFiles
 CMakeCache.txt
 addressextract
+!test/data/*.json

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18.4)
+cmake_minimum_required (VERSION 3.19)
 project (addressextract)
 
 if(NOT CMAKE_BUILD_TYPE)

@@ -45,7 +45,52 @@ find_path(JSON_INCLUDE_DIR
 	)
 message("nlohmann directory ${JSON_INCLUDE_DIR}")
 
-add_executable(addressextract addressextract.cpp AbstractArea.cpp Address.cpp)
 include_directories(${Boost_INCLUDE_DIRS} ${JSON_INCLUDE_DIR} ${OSMIUM_INCLUDE_DIRS})
 
-target_link_libraries(addressextract ${Boost_LIBRARIES} ${OSMIUM_LIBRARIES})
+# Code shared between the program and the unit tests
+add_library(addresscore STATIC AbstractArea.cpp Address.cpp)
+target_link_libraries(addresscore ${OSMIUM_LIBRARIES})
+
+add_executable(addressextract addressextract.cpp)
+target_link_libraries(addressextract addresscore ${Boost_LIBRARIES} ${OSMIUM_LIBRARIES})
+
+# Unit tests: ctest, JUnit output: ctest --output-junit junit.xml
+option(ENABLE_COVERAGE "Build with gcov instrumentation" OFF)
+option(BUILD_TESTING "Build the unit tests" ON)
+
+if(ENABLE_COVERAGE)
+	set(COVERAGE_FLAGS --coverage -O0 -g)
+	target_compile_options(addresscore PUBLIC ${COVERAGE_FLAGS})
+	target_link_options(addresscore PUBLIC --coverage)
+	target_compile_options(addressextract PRIVATE ${COVERAGE_FLAGS})
+	target_link_options(addressextract PRIVATE --coverage)
+endif()
+
+if(BUILD_TESTING)
+	find_package(Catch2 3 QUIET)
+	if(Catch2_FOUND)
+		enable_testing()
+		add_subdirectory(test)
+
+		if(ENABLE_COVERAGE)
+			find_program(GCOVR gcovr)
+			if(GCOVR)
+				# make coverage: runs the tests, writes coverage.xml (Cobertura) and a summary
+				add_custom_target(coverage
+					COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --output-junit junit.xml
+					COMMAND ${GCOVR} --root ${CMAKE_SOURCE_DIR}
+						--filter ${CMAKE_SOURCE_DIR}/.*
+						--exclude ${CMAKE_SOURCE_DIR}/test/.*
+						--object-directory ${CMAKE_BINARY_DIR}
+						--print-summary --xml coverage.xml
+					WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+					VERBATIM
+					COMMENT "Running tests and collecting coverage")
+			else()
+				message(WARNING "gcovr not found, no coverage target")
+			endif()
+		endif()
+	else()
+		message(STATUS "Catch2 v3 not found - unit tests disabled")
+	endif()
+endif()

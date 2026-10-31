@@ -1,6 +1,7 @@
 #ifndef BOUNDARY_HPP
 #define BOUNDARY_HPP
 
+#include <iostream>
 #include <osmium/osm/area.hpp>
 #include "PreparedArea.hpp"
 

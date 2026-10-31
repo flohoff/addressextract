@@ -58,3 +58,32 @@ buildlatestsid:
     - mkdir build
     - ( cd build ; cmake .. )
     - make -C build
+
+unittests:
+  image: amd64/debian:trixie
+  stage: test
+  variables:
+    DEBIAN_FRONTEND: "noninteractive"
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_BASE: https://gitlab-ci-token:${CI_JOB_TOKEN}@gl.zz.de
+  script:
+    - apt-get update && apt-get -fuy install git
+    - git clone ${GIT_BASE}/mirror/osmcode/libosmium && git -C libosmium checkout -b build $LIBOSMIUM_STABLE_VERSION
+    - git clone ${GIT_BASE}/mirror/nlohmann-json json && git -C json checkout -b build $NLOHMANN_STABLE_VERSION
+    - git clone ${GIT_BASE}/mirror/protozero && git -C protozero checkout -b build $PROTOZERO_STABLE_VERSION
+    - apt-get install -fuy build-essential cmake cmake-data libboost-all-dev libgdal-dev libbz2-dev libexpat1-dev catch2 gcovr
+    - mkdir build
+    - ( cd build ; cmake -DENABLE_COVERAGE=ON .. )
+    - make -C build
+    - make -C build coverage
+  coverage: '/^lines: (\d+\.\d+)%/'
+  artifacts:
+    when: always
+    paths:
+      - build/junit.xml
+      - build/coverage.xml
+    reports:
+      junit: build/junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: build/coverage.xml

@@ -117,6 +117,21 @@ Todo
   33602,Bielefeld,LOOM, Bahnhofstraße,28,52.025702,8.531427,node,5202495577,33602,Bielefeld,,
 
 
+Tests
+=====
+
+Unit tests use Catch2 (v3) and run through CMake's ctest:
+
+    cmake -S . -B build -DENABLE_COVERAGE=ON
+    cmake --build build
+    cmake --build build --target coverage
+
+The `coverage` target runs ctest, writes `build/junit.xml` (JUnit, used by
+the GitLab `unittests` job) and `build/coverage.xml` (Cobertura, via gcovr).
+Without `-DENABLE_COVERAGE=ON` only `ctest --test-dir build
+--output-junit junit.xml` is needed. If Catch2 is not installed the tests
+are skipped silently; `-DBUILD_TESTING=OFF` disables them explicitly.
+
 Design decisions
 ================
 

@@ -71,7 +71,8 @@ if(ENABLE_MULL)
 endif()
 
 if(ENABLE_COVERAGE)
-	set(COVERAGE_FLAGS --coverage -O0 -g)
+	# atomic: libosmium reader threads corrupt plain gcov counters
+	set(COVERAGE_FLAGS --coverage -fprofile-update=atomic -O0 -g)
 	target_compile_options(addresscore PUBLIC ${COVERAGE_FLAGS})
 	target_link_options(addresscore PUBLIC --coverage)
 	target_compile_options(addressextract PRIVATE ${COVERAGE_FLAGS})
@@ -94,6 +95,7 @@ if(BUILD_TESTING)
 						--filter ${CMAKE_SOURCE_DIR}/.*
 						--exclude ${CMAKE_SOURCE_DIR}/test/.*
 						--object-directory ${CMAKE_BINARY_DIR}
+						--gcov-ignore-parse-errors=negative_hits.warn_once_per_file
 						--print-summary --xml coverage.xml
 						${CMAKE_BINARY_DIR}
 					WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

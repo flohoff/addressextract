@@ -1,5 +1,4 @@
-# Runs addressextract on an input and compares the output with a golden file.
-# Parameters: EXE INPUT OUT EXPECTED, optional FLAGS (; separated)
+# Params: EXE INPUT OUT EXPECTED [FLAGS]
 execute_process(
 	COMMAND ${EXE} ${FLAGS} -i ${INPUT} -o ${OUT}
 	RESULT_VARIABLE rc

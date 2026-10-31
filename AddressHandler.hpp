@@ -156,8 +156,9 @@ public:
 				break;
 			}
 
+			/* intersects: edge points must match the cache path */
 			postcodeindex.compared++;
-			if (i->contains(geom)) {
+			if (i->intersects(geom)) {
 				address.tag_add_name("geom:postcode", i->postcode.c_str());
 				break;
 			}

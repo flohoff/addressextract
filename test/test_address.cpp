@@ -106,7 +106,7 @@ TEST_CASE("json output escapes untrusted values") {
 
 	std::ostringstream os;
 	os << o;
-	/* No raw control characters may survive in the serialized line */
+	/* no raw control chars in the line */
 	REQUIRE(os.str().find('\n') == std::string::npos);
 	REQUIRE(os.str().find('\t') == std::string::npos);
 

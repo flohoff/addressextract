@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
-"""Generates synthetic.osm - a tiny hand made OSM XML file for the tests.
-
-Layout (lon/lat):
-  county   8.40-8.80 / 51.90-52.30  admin_level 6 "Kreis Test"
-  city     8.50-8.70 / 52.00-52.20  admin_level 8 "Teststadt"
-  suburb   diamond in 8.50-8.60 / 52.00-52.10, admin_level 10 "Altstadt"
-  junk     unnamed admin_level 10 (must be dropped)
-  postcode 8.45-8.65 / 51.95-52.15  33602
-Run: ./gen_synthetic.py > synthetic.osm
-"""
+"""Generates synthetic.osm. Run: ./gen_synthetic.py > synthetic.osm"""
 from xml.sax.saxutils import quoteattr
 
 nodes, ways, rels = [], [], []

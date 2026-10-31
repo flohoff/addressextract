@@ -14,7 +14,7 @@
 #include <gdalcpp.hpp>
 #include <ogr_geometry.h>
 
-/* An osmium::Area carrying only tags, which is all the classes look at */
+/* osmium::Area with tags only */
 class TestArea {
 	osmium::memory::Buffer	buffer{4096, osmium::memory::Buffer::auto_grow::yes};
 public:

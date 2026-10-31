@@ -49,7 +49,7 @@ TEST_CASE("PreparedArea matches unprepared results") {
 		REQUIRE(p.contains(&q) == u.contains(&q));
 		REQUIRE(p.intersects(&q) == u.intersects(&q));
 	}
-	/* boundary points: intersects but not contained */
+	/* edge: intersects, not contained */
 	OGRPoint edge=pt(0, 5);
 	REQUIRE(p.intersects(&edge));
 	REQUIRE_FALSE(p.contains(&edge));

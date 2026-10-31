@@ -46,7 +46,7 @@ TEST_CASE("AreaIndex cache grid creates cells fully within the parent") {
 	idx.insert(&b, ta.area());
 
 	REQUIRE(idx.cacheentriespos > 0);
-	/* A plain box is entirely covered by its first cell */
+	/* box: one cell covers it */
 	REQUIRE(idx.cacheentriespos == 1);
 
 	OGRPoint q(5, 5);
@@ -64,7 +64,7 @@ TEST_CASE("Cache grid skips cells outside a concave geometry") {
 	AreaIndex<Boundary> idx(true);
 	TestArea ta({{"name", "L"}, {"admin_level", "8"}});
 
-	/* L shape: the upper right quadrant is empty */
+	/* L shape, upper right empty */
 	auto ring=std::make_unique<OGRLinearRing>();
 	double xy[][2]={{0,0},{10,0},{10,5},{5,5},{5,10},{0,10},{0,0}};
 	for (auto& p : xy) ring->addPoint(p[0], p[1]);
@@ -89,7 +89,6 @@ TEST_CASE("Cache grid skips cells outside a concave geometry") {
 TEST_CASE("Boundary without name is invalid and not indexed") {
 	AreaIndex<Boundary> idx(false);
 	TestArea unnamed({{"admin_level", "8"}});
-	/* The handler path needs real node locations, so test insert filter via valid() */
 	Boundary b(box_polygon(0, 0, 1, 1), unnamed.area());
 	REQUIRE_FALSE(b.valid());
 	REQUIRE(idx.areavector.empty());
@@ -104,7 +103,7 @@ TEST_CASE("Boundary sort order: most specific first, then cache before real") {
 	Boundary suburb(box_polygon(0, 0, 1, 1), t10.area());
 	Boundary cell(box_polygon(0, 0, 1, 1), t8b.area(), false);
 	cell.cache=true;
-	cell.id=city.id;       // a cell has the same id as its parent
+	cell.id=city.id;       // cell shares parent id
 
 	std::vector<Boundary*> l={&city, &cell, &suburb};
 	std::sort(l.begin(), l.end(), compare_admin_level);

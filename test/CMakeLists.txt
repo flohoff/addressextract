@@ -23,6 +23,7 @@ function(golden_test name)
 			-DOUT=${CMAKE_CURRENT_BINARY_DIR}/out_${name}.json
 			-DEXPECTED=${CMAKE_CURRENT_SOURCE_DIR}/data/expected_${expect}.json
 			"-DFLAGS=${ARGN}"
+			-DOSMIUM=${OSMIUM_PROGRAM}
 			-P ${CMAKE_CURRENT_SOURCE_DIR}/run_golden.cmake)
 endfunction()
 
@@ -37,6 +38,16 @@ golden_test(errors_nocache -e --nocache)
 set(EXPECT missing)
 golden_test(missing_nocache -m --nocache)
 unset(EXPECT)
+
+# PBF input (header timestamp), needs the osmium tool
+find_program(OSMIUM_TOOL osmium)
+if(OSMIUM_TOOL)
+	set(OSMIUM_PROGRAM ${OSMIUM_TOOL})
+	golden_test(errors_pbf -e)
+	unset(OSMIUM_PROGRAM)
+else()
+	message(STATUS "osmium not found - pbf test disabled")
+endif()
 
 # Command line handling
 add_test(NAME cli_help COMMAND addressextract --help)

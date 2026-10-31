@@ -71,7 +71,7 @@ unittests:
     - git clone ${GIT_BASE}/mirror/osmcode/libosmium && git -C libosmium checkout -b build $LIBOSMIUM_STABLE_VERSION
     - git clone ${GIT_BASE}/mirror/nlohmann-json json && git -C json checkout -b build $NLOHMANN_STABLE_VERSION
     - git clone ${GIT_BASE}/mirror/protozero && git -C protozero checkout -b build $PROTOZERO_STABLE_VERSION
-    - apt-get install -fuy build-essential cmake cmake-data libboost-all-dev libgdal-dev libbz2-dev libexpat1-dev catch2 gcovr
+    - apt-get install -fuy build-essential cmake cmake-data libboost-all-dev libgdal-dev libbz2-dev libexpat1-dev catch2 gcovr osmium-tool
     - mkdir build
     - ( cd build ; cmake -DENABLE_COVERAGE=ON .. )
     - make -C build

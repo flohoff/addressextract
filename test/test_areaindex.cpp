@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
+#include <cmath>
 
 #include "AreaIndex.hpp"
 #include "Boundary.hpp"
@@ -110,4 +111,27 @@ TEST_CASE("Boundary sort order: most specific first, then cache before real") {
 	REQUIRE(l[0] == &suburb);
 	REQUIRE(l[1] == &cell);
 	REQUIRE(l[2] == &city);
+}
+
+static std::unique_ptr<OGRGeometry> circle(int nodes) {
+	auto ring=std::make_unique<OGRLinearRing>();
+	for (int i=0;i<nodes;i++) {
+		double a=2*M_PI*i/nodes;
+		ring->addPoint(5+4*cos(a), 5+4*sin(a));
+	}
+	ring->closeRings();
+	auto poly=std::make_unique<OGRPolygon>();
+	poly->addRingDirectly(ring.release());
+	return poly;
+}
+
+TEST_CASE("Cache grid depth grows with geometry size") {
+	AreaIndex<Boundary> idx(true);
+	TestArea ta({{"name", "C"}, {"admin_level", "8"}});
+	Boundary small(circle(100), ta.area());
+	Boundary mid(circle(1000), ta.area());
+	Boundary big(circle(7000), ta.area());
+	REQUIRE(idx.cache_depth(&small) == 3);
+	REQUIRE(idx.cache_depth(&mid) == 4);
+	REQUIRE(idx.cache_depth(&big) == 5);
 }

@@ -117,9 +117,6 @@ public:
 		for(auto b : boundarylist) {
 			boundaryindex.returned++;
 
-			if (b->admin_level > 10)
-				continue;
-
 			if (b->cache) {
 				boundaryindex.cachehitpos++;
 				extend_city_boundary(address, b->parent);
@@ -295,10 +292,8 @@ public:
 
 		address.parse_from_tags(tags);
 
-		if (geom) {
-			extend_city(address, geom);
-			extend_postcode(address, geom);
-		}
+		extend_city(address, geom);
+		extend_postcode(address, geom);
 
 		if (t_errors)
 			checkerror(address, geom);
@@ -360,20 +355,6 @@ public:
 		address.bbox[3]=location.lat();
 
 		parseaddr(address, &point, node.tags());
-
-		writer(address);
-	}
-
-	void area(const osmium::Area& area) {
-		Address::Object	address;
-
-		if (!isaddress(area.tags()))
-			return;
-
-		address.source=Address::SourceRelation;
-		address.osmobjid=area.id();
-
-		parseaddr(address, nullptr, area.tags());
 
 		writer(address);
 	}

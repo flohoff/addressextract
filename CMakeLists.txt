@@ -83,6 +83,7 @@ if(BUILD_TESTING)
 						--exclude ${CMAKE_SOURCE_DIR}/test/.*
 						--object-directory ${CMAKE_BINARY_DIR}
 						--print-summary --xml coverage.xml
+						${CMAKE_BINARY_DIR}
 					WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 					VERBATIM
 					COMMENT "Running tests and collecting coverage")

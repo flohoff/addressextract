@@ -41,6 +41,8 @@ area([(8.55, 52.00), (8.60, 52.05), (8.55, 52.10), (8.50, 52.05)],
      {"boundary": "administrative", "admin_level": "10", "name": "Altstadt"})
 area(box(8.51, 52.11, 8.52, 52.12), {"boundary": "administrative", "admin_level": "10"})
 area(box(8.45, 51.95, 8.65, 52.15), {"boundary": "postal_code", "postal_code": "33602"})
+# kreisfreie Stadt: admin_level 6 with de:place
+area(box(9.00, 52.00, 9.10, 52.10), {"boundary": "administrative", "admin_level": "6", "name": "Freistadt", "de:place": "city"})
 # a postcode without code is dropped
 area(box(8.45, 52.16, 8.46, 52.17), {"boundary": "postal_code"})
 
@@ -48,6 +50,9 @@ area(box(8.45, 52.16, 8.46, 52.17), {"boundary": "postal_code"})
 ring(box(8.5200, 52.0200, 8.5210, 52.0210),
      {"building": "yes", "addr:street": "Hauptstraße", "addr:housenumber": "10",
       "addr:city": "Teststadt", "addr:postcode": "33602"})
+# Triangle building: bbox corner is outside the polygon
+ring([(8.540, 52.040), (8.541, 52.040), (8.540, 52.041)],
+     {"building": "yes", "addr:street": "Dreieck", "addr:housenumber": "20"})
 # Plain building without address: not indexed as address
 ring(box(8.5300, 52.0300, 8.5310, 52.0310), {"building": "yes"})
 
@@ -78,6 +83,10 @@ addr(9.5000, 53.0000)                                   # outside everything
 # inside the addressed building, conflicting city
 addr(8.52050, 52.02050, addr_city="Andersstadt")
 addr(8.52055, 52.02055)                                 # inside, matching
+addr(9.0500, 52.0500, addr_city="Freistadt")            # admin_level 6 city
+addr(8.5995, 52.0500)                                   # diamond tip: not covered by a cache cell
+addr(8.5409, 52.0409)                                   # in triangle bbox, outside triangle
+addr(8.6300, 52.1900, addr_postcode=None)               # No postcode
 # addr:place instead of street
 addr(8.6700, 52.1000, addr_street=None, addr_place="Auf dem Berg")
 # nodes without address tags
@@ -87,6 +96,9 @@ node(8.6, 52.1)
 # Address on a way (centroid is used)
 w_ids = [node(8.6700, 52.1100), node(8.6710, 52.1100), node(8.6710, 52.1110)]
 way(w_ids, {"addr:street": "Weg", "addr:housenumber": "7", "addr:city": "Teststadt", "addr:postcode": "33602"})
+# address ways which cannot be turned into a geometry
+way([w_ids[0], 999999], {"addr:street": "Fehlt", "addr:housenumber": "1"})
+way([w_ids[0]], {"addr:street": "Kurz", "addr:housenumber": "2"})
 # plain way
 way(w_ids[:2], {"highway": "residential"})
 

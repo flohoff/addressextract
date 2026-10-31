@@ -36,11 +36,6 @@ static bool t_missing=false;
 static bool t_nocache=false;
 
 void boundary_add_parent(AreaIndex<Boundary>& index, Boundary *b) {
-	if (b->cache)
-		return;
-	if (b->up)
-		return;
-
 	std::vector<Boundary*> list;
 	list.clear();
 	index.findoverlapping(b, &list);
@@ -217,7 +212,9 @@ int main(int argc, char* argv[]) {
 	po::variables_map vm;
 	try {
 		po::store(po::parse_command_line(argc, argv, desc), vm);
-		po::notify(vm);
+		/* --help must work without the required options */
+		if (!vm.count("help"))
+			po::notify(vm);
 	} catch(const boost::program_options::error& e) {
 		std::cerr << "Error: " << e.what() << "\n";
 		std::cout << desc << std::endl;

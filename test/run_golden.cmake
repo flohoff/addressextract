@@ -1,4 +1,17 @@
-# Params: EXE INPUT OUT EXPECTED [FLAGS]
+# Params: EXE INPUT OUT EXPECTED [FLAGS] [OSMIUM: convert INPUT to pbf first]
+if(OSMIUM)
+	set(pbf ${OUT}.pbf)
+	execute_process(
+		COMMAND ${OSMIUM} cat --overwrite -f pbf
+			--output-header=osmosis_replication_timestamp=2026-01-01T00:00:00Z
+			-o ${pbf} ${INPUT}
+		RESULT_VARIABLE rc ERROR_VARIABLE err)
+	if(NOT rc EQUAL 0)
+		message(FATAL_ERROR "osmium failed (${rc}): ${err}")
+	endif()
+	set(INPUT ${pbf})
+endif()
+
 execute_process(
 	COMMAND ${EXE} ${FLAGS} -i ${INPUT} -o ${OUT}
 	RESULT_VARIABLE rc

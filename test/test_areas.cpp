@@ -112,3 +112,8 @@ TEST_CASE("Building is valid only with address tags") {
 	Building c(box_polygon(0, 0, 1, 1), plain.area());
 	REQUIRE_FALSE(c.valid());
 }
+
+TEST_CASE("AbstractArea dump does not crash") {
+	AbstractArea a(box_polygon(0, 0, 1, 1));
+	a.dump();
+}

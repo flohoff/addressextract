@@ -3,68 +3,119 @@
 e.g. objects with `addr:*` tags on them. It also reassembles admin and postcode
 boundarys and extends the addressinformation with those.
 
-A typical address looks like this:
+The input is an OpenStreetMap PBF (or OSM XML) file. The output is one JSON
+object per address, one per line, so it can be processed with line based tools.
 
-    
-      "city": "Paderborn",
-      "geomcity": "Paderborn",
-      "geomcounty": "Kreis Paderborn",
-      "geompostcode": "33098",
-      "geomsuburb": "Paderborn",
-      "housenumber": "2a",
-      "housename": "foobar",
-      "id": "25906061",
-      "lat": "51.717383",
-      "lon": "8.752651",
-      "postcode": "33098",
+A typical address looks like this (pretty printed from the Kreis Gütersloh extract):
+
+    {
+      "bbox": [8.4281104, 51.80841, 8.4281104, 51.80841],
+      "city": "Rietberg",
+      "country": "DE",
+      "geomcity": "Rietberg",
+      "geompostcode": "33397",
+      "geomsuburb": "Rietberg",
+      "housenumber": "2",
+      "id": 259778720,
+      "lat": 51.80841,
+      "lon": 8.4281104,
+      "postcode": "33397",
       "source": "node",
-      "street": "Marienplatz"
+      "street": "Bolzenmarkt"
     }
 
-All the `geom*` tags originate from the boundaries, be it postcode or admin boundary.
-`id` and `source` tell the origin osm object be it node or way and its id.
+All the `geom*` tags (`geomcity`, `geomcounty`, `geomsuburb`, `geompostcode`)
+originate from the boundaries, be it postcode or admin boundary - they are what the
+coordinates of the object fall into, independent of the `addr:*` tags the mapper set.
+`id` and `source` (`node` or `way`) tell the origin osm object and its id. `lat` and `lon`
+are the position (the centroid for ways), `bbox` is `[minlon, minlat, maxlon, maxlat]`.
 
-Additionally you could run the extractor with "-e" so it will add an error field
-describing problems with this address - It could look like this:
+Additionally you can run the extractor with `-e` so it will check the address and
+add an `errors` field describing problems with it. It could look like this
+(`bbox`, `lat` and `lon` left out):
 
+    {
+      "city": "Halle (Westf.)",
+      "country": "DE",
       "errors": [
         "No housenumber",
-        "No postcode",
         "No addr:street or addr:place"
-      ]
+      ],
+      "geomcity": "Halle (Westf.)",
+      "geompostcode": "33790",
+      "geomsuburb": "Halle (Westf)",
+      "id": 307194541,
+      "postcode": "33790",
+      "source": "node"
+    }
 
 Usage
 =====
 
-	addressextract [-e] -i mylocal.pbf -o addresses.json
+	addressextract [options] -i mylocal.pbf -o addresses.json
+
+Without `-e` and `-m` only the addresses are exported as they are tagged. Options:
+
+	-i, --infile arg        Input file (PBF or OSM XML)
+	-o, --outfile arg       Output file
+	-e, --errors            Add geom* tags and check the address for errors
+	-m, --missing           Add geom* tags only, without the error analysis
+	-v, --verbose           Print index statistics to stdout
+	    --nocache           Do not use the boundary cache grid (slow, same result)
+	    --postcoderegex arg Postcode validation regex, default ^[0-9]{5}$
+	-h, --help              Show the options
+
+Progress and diagnostics go to stderr. The run takes three passes over the input
+file: relations, then boundaries/postcodes/buildings, then the addresses. A
+Regierungsbezirk sized extract (about 170 MB) takes roughly 20 seconds with `-e`.
 
 Filtering and extracting
 ========================
-	
+
 To filter or extract addresses from the resulting json there is either the tool `addrfilter`:
 
 	addrfilter -p 33330 -i owl.json -c
 
 To export all address with postcode 33330 and dump it as CSV. An alternative is to use `jq`:
 
-	jq -r '.addresses[] | [ .id, .source, .postcode, .city, .street, .housenumber ] | @csv' owl.json
+	jq -s -r '.[0].addresses[] | [ .id, .source, .postcode, .city, .street, .housenumber ] | @csv' owl.json
 
 Build
 =====
 
-	apt-get install build-essential cmake-data cmake libboost-all-dev \
-	    libgdal-dev libbz2-dev libexpat1-dev
+Needs a C++17 compiler, cmake 3.19 or newer, Boost, GDAL and the header only
+libraries libosmium, protozero and nlohmann/json.
+
+With the Debian (trixie or newer) packages:
+
+	apt-get install build-essential cmake libboost-dev libboost-program-options-dev \
+	    libgdal-dev libbz2-dev libexpat1-dev zlib1g-dev \
+	    libosmium2-dev libprotozero-dev nlohmann-json3-dev
 
 	git clone https://github.com/flohoff/addressextract.git
+	cd addressextract
+	cmake -S . -B build
+	cmake --build build -j
+
+Alternatively get the header only dependencies from git instead of the packages -
+if you need a newer version than the distribution has. Cloned next to the
+source (`libosmium`, `protozero`, `json`) or as siblings (`../libosmium`,
+`../protozero`) they are found without further configuration:
 
 	cd addressextract
-
-	git clone https://github.com/nlohmann/json
-	git clone https://github.com/mapbox/protozero
 	git clone https://github.com/osmcode/libosmium
+	git clone https://github.com/mapbox/protozero
+	git clone https://github.com/nlohmann/json
 
-	cmake .
-	make
+A system installed `nlohmann-json3-dev` takes precedence over the `json` clone.
+
+The binary is `build/addressextract`. For the unit tests install `catch2` (plus `gcovr`
+for coverage and `osmium-tool` for the PBF test) - see "Tests" below.
+
+Example run on an extract from Geofabrik:
+
+	wget https://download.geofabrik.de/europe/germany/nordrhein-westfalen/detmold-regbez-latest.osm.pbf -O owl.pbf
+	build/addressextract -e -i owl.pbf -o owl.json
 
 Search as you type
 ==================

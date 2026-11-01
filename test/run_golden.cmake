@@ -23,7 +23,7 @@ endif()
 
 # Must be valid JSON
 file(READ ${OUT} content)
-string(JSON naddr LENGTH "${content}" addresses)
+string(JSON naddr LENGTH "${content}" features)
 message(STATUS "${naddr} addresses")
 
 execute_process(

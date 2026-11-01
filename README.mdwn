@@ -3,37 +3,43 @@
 e.g. objects with `addr:*` tags on them. It also reassembles admin and postcode
 boundarys and extends the addressinformation with those.
 
-The input is an OpenStreetMap PBF (or OSM XML) file. The output is one JSON
-document with a `meta` object (the timestamp of the input) and an `addresses` array.
-The addresses are written one per line, so `grep` and `diff` work on them too.
+The input is an OpenStreetMap PBF (or OSM XML) file. The output is one GeoJSON
+`FeatureCollection` with a `metadata` object (the timestamp of the input) and a `features`
+array of Point features. The features are written one per line, so `grep` and `diff` work on them too.
 
 A typical address looks like this (pretty printed from the Kreis Gütersloh extract):
 
     {
+      "type": "Feature",
       "bbox": [8.4281104, 51.80841, 8.4281104, 51.80841],
-      "city": "Rietberg",
-      "country": "DE",
-      "geomcity": "Rietberg",
-      "geompostcode": "33397",
-      "geomsuburb": "Rietberg",
-      "housenumber": "2",
-      "id": 259778720,
-      "lat": 51.80841,
-      "lon": 8.4281104,
-      "postcode": "33397",
-      "source": "node",
-      "street": "Bolzenmarkt"
+      "geometry": {
+        "type": "Point",
+        "coordinates": [8.4281104, 51.80841]
+      },
+      "properties": {
+        "city": "Rietberg",
+        "country": "DE",
+        "geomcity": "Rietberg",
+        "geompostcode": "33397",
+        "geomsuburb": "Rietberg",
+        "housenumber": "2",
+        "id": 259778720,
+        "postcode": "33397",
+        "source": "node",
+        "street": "Bolzenmarkt"
+      }
     }
 
 All the `geom*` tags (`geomcity`, `geomcounty`, `geomsuburb`, `geompostcode`)
 originate from the boundaries, be it postcode or admin boundary - they are what the
 coordinates of the object fall into, independent of the `addr:*` tags the mapper set.
-`id` and `source` (`node` or `way`) tell the origin osm object and its id. `lat` and `lon`
-are the position (the centroid for ways), `bbox` is `[minlon, minlat, maxlon, maxlat]`.
+`id` and `source` (`node` or `way`) tell the origin osm object and its id. The
+Point `coordinates` (`[lon, lat]`) are the position (the centroid for ways), `bbox` is
+`[minlon, minlat, maxlon, maxlat]`.
 
 Additionally you can run the extractor with `-e` so it will check the address and
 add an `errors` field describing problems with it. It could look like this
-(`bbox`, `lat` and `lon` left out):
+(`bbox` and `geometry` left out; shown are the `properties`):
 
     {
       "city": "Halle (Westf.)",
@@ -80,7 +86,7 @@ To filter or extract addresses from the resulting json there is either the perl 
 
 To export all address with postcode 33330 and dump it as CSV. An alternative is to use `jq`:
 
-	jq -r '.addresses[] | [ .id, .source, .postcode, .city, .street, .housenumber ] | @csv' owl.json
+	jq -r '.features[].properties | [ .id, .source, .postcode, .city, .street, .housenumber ] | @csv' owl.json
 
 Build
 =====
@@ -129,7 +135,7 @@ Using Debian/Buster to setup a solr:
 	sudo service jetty9 restart
 
 	addressextract -m -i mylittlepbf -o addresses.json
-    jq .addresses <addresses.json >onlyaddresses.json
+    jq '[.features[] | .properties + {lon: .geometry.coordinates[0], lat: .geometry.coordinates[1]}]' <addresses.json >onlyaddresses.json
 
 	searchasyoutype/pushtosolr http://localhost:8080/solr onlyaddresses.json
 

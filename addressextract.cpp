@@ -126,8 +126,9 @@ void process_file(const Options& opts) {
 	std::ofstream outfile(opts.outfile);
 
 	outfile << "{" << std::endl
-		<< "\"meta\": " << jmeta << "," << std::endl
-		<< "\"addresses\": [" << std::endl;
+		<< "\"type\": \"FeatureCollection\"," << std::endl
+		<< "\"metadata\": " << jmeta << "," << std::endl
+		<< "\"features\": [" << std::endl;
 
 	/* The finished record is held back until the next record arrives,
 	 * so the "," lands at the end of every line but never after the

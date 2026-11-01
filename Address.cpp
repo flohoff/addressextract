@@ -72,29 +72,32 @@ void Object::parse_from_tags(const osmium::TagList& tags) {
 std::ostream& operator<<(std::ostream& os, const Object& a) {
 	nlohmann::json jaddr;
 
-	jaddr["id"]=a.osmobjid;
-	jaddr["source"]=a.source_string();
-
-	jaddr["lat"]=a.lat;
-	jaddr["lon"]=a.lon;
-
-	if (a.bbox[0]) {
-		nlohmann::json bbox;
-		for(int i=0;i<=3;i++)
-			bbox.push_back(a.bbox[i]);
-		jaddr["bbox"]=bbox;
-	}
+	nlohmann::json props;
+	props["id"]=a.osmobjid;
+	props["source"]=a.source_string();
 
 	for(auto& t : a.tags)
-		jaddr[t.info.tagshort]=t.value;
+		props[t.info.tagshort]=t.value;
 
 	if (a.errors.size() > 0) {
 		nlohmann::json errors;
 		for(auto& errorstring : a.errors) {
 			errors.push_back(errorstring);
 		}
-		jaddr["errors"]=errors;
+		props["errors"]=errors;
 	}
+
+	jaddr["type"]="Feature";
+	jaddr["geometry"]={
+		{"type", "Point"},
+		{"coordinates", {a.lon, a.lat}}};
+	if (a.bbox[0]) {
+		nlohmann::json bbox;
+		for(int i=0;i<=3;i++)
+			bbox.push_back(a.bbox[i]);
+		jaddr["bbox"]=bbox;
+	}
+	jaddr["properties"]=props;
 
 	os << jaddr;
 

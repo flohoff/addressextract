@@ -13,6 +13,10 @@ static nlohmann::json to_json(const Object& o) {
 	return nlohmann::json::parse(os.str());
 }
 
+static nlohmann::json props(const Object& o) {
+	return to_json(o)["properties"];
+}
+
 TEST_CASE("parse_from_tags picks up only address keys") {
 	TestArea ta({{"addr:city", "Bielefeld"}, {"addr:street", "Hauptstr."},
 		{"building", "yes"}, {"name", "x"}});
@@ -79,17 +83,20 @@ TEST_CASE("json output") {
 	o.bbox[0]=8.25; o.bbox[1]=52.5; o.bbox[2]=8.25; o.bbox[3]=52.5;
 	o.tag_add_name("addr:street", "Hauptstr.");
 
-	auto j=to_json(o);
+	auto f=to_json(o);
+	REQUIRE(f["type"] == "Feature");
+	REQUIRE(f["geometry"]["type"] == "Point");
+	REQUIRE(f["geometry"]["coordinates"][0] == 8.25);
+	REQUIRE(f["geometry"]["coordinates"][1] == 52.5);
+	REQUIRE(f["bbox"].size() == 4);
+	auto j=f["properties"];
 	REQUIRE(j["id"] == 42);
 	REQUIRE(j["source"] == "node");
-	REQUIRE(j["lat"] == 52.5);
-	REQUIRE(j["lon"] == 8.25);
 	REQUIRE(j["street"] == "Hauptstr.");
-	REQUIRE(j["bbox"].size() == 4);
 	REQUIRE_FALSE(j.contains("errors"));
 
 	o.error_add("No housenumber");
-	j=to_json(o);
+	j=props(o);
 	REQUIRE(j["errors"].size() == 1);
 	REQUIRE(j["errors"][0] == "No housenumber");
 }
@@ -110,7 +117,7 @@ TEST_CASE("json output escapes untrusted values") {
 	REQUIRE(os.str().find('\n') == std::string::npos);
 	REQUIRE(os.str().find('\t') == std::string::npos);
 
-	auto j=nlohmann::json::parse(os.str());
+	auto j=nlohmann::json::parse(os.str())["properties"];
 	REQUIRE(j["street"] == evil);
 	REQUIRE(j["errors"][0] == evil);
 }
@@ -123,5 +130,13 @@ TEST_CASE("later duplicate tag wins in json") {
 	o.bbox[0]=0; o.bbox[1]=0; o.bbox[2]=0; o.bbox[3]=0;
 	o.tag_add_name("geom:city", "First");
 	o.tag_add_name("geom:city", "Second");
-	REQUIRE(to_json(o)["geomcity"] == "Second");
+	REQUIRE(props(o)["geomcity"] == "Second");
+}
+
+TEST_CASE("json output omits bbox when unset") {
+	Object o;
+	o.source=SourceNode;
+	o.lat=1; o.lon=2;
+	o.bbox[0]=o.bbox[1]=o.bbox[2]=o.bbox[3]=0;
+	REQUIRE_FALSE(to_json(o).contains("bbox"));
 }
